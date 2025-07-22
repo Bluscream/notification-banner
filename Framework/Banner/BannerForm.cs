@@ -42,7 +42,7 @@ namespace NotificationBanner.Banner {
         /// </summary>
         public BannerForm() {
             StartPosition = FormStartPosition.Manual;
-            Size = new System.Drawing.Size(350, 80);
+            Size = new System.Drawing.Size(438, 100); // 350 * 1.25 = 438, 80 * 1.25 = 100
             TopMost = true;
             FormBorderStyle = FormBorderStyle.None;
             ShowInTaskbar = false;
@@ -52,17 +52,17 @@ namespace NotificationBanner.Banner {
 
             // Create UI controls
             pbxLogo = new PictureBox {
-                Size = new Size(32, 32),
-                Location = new Point(12, 12),
+                Size = new Size(40, 40), // 32 * 1.25 = 40
+                Location = new Point(15, 15), // 12 * 1.25 = 15
                 SizeMode = PictureBoxSizeMode.Zoom,
                 BackColor = Color.Transparent
             };
 
             lblTop = new Label {
                 AutoSize = false,
-                Size = new Size(280, 20),
-                Location = new Point(56, 12),
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Size = new Size(350, 25), // 280 * 1.25 = 350, 20 * 1.25 = 25
+                Location = new Point(70, 15), // 56 * 1.25 = 70, 12 * 1.25 = 15
+                Font = new Font("Segoe UI", 12.5f, FontStyle.Bold), // 10 * 1.25 = 12.5
                 ForeColor = Color.White,
                 BackColor = Color.Transparent,
                 TextAlign = ContentAlignment.MiddleLeft
@@ -70,9 +70,9 @@ namespace NotificationBanner.Banner {
 
             lblTitle = new Label {
                 AutoSize = false,
-                Size = new Size(280, 40),
-                Location = new Point(56, 32),
-                Font = new Font("Segoe UI", 9),
+                Size = new Size(350, 50), // 280 * 1.25 = 350, 40 * 1.25 = 50
+                Location = new Point(70, 40), // 56 * 1.25 = 70, 32 * 1.25 = 40
+                Font = new Font("Segoe UI", 11.25f), // 9 * 1.25 = 11.25
                 ForeColor = Color.LightGray,
                 BackColor = Color.Transparent,
                 TextAlign = ContentAlignment.TopLeft
@@ -113,21 +113,21 @@ namespace NotificationBanner.Banner {
             if (scaleFactor <= 0) scaleFactor = 1.0;
             
             // Scale form size
-            var baseWidth = 350;
-            var baseHeight = 80;
+            var baseWidth = 438; // 350 * 1.25 = 438
+            var baseHeight = 100; // 80 * 1.25 = 100
             Size = new Size((int)(baseWidth * scaleFactor), (int)(baseHeight * scaleFactor));
             
             // Scale control sizes and positions
-            pbxLogo.Size = new Size((int)(32 * scaleFactor), (int)(32 * scaleFactor));
-            pbxLogo.Location = new Point((int)(12 * scaleFactor), (int)(12 * scaleFactor));
+            pbxLogo.Size = new Size((int)(40 * scaleFactor), (int)(40 * scaleFactor)); // 32 * 1.25 = 40
+            pbxLogo.Location = new Point((int)(15 * scaleFactor), (int)(15 * scaleFactor)); // 12 * 1.25 = 15
             
-            lblTop.Size = new Size((int)(280 * scaleFactor), (int)(20 * scaleFactor));
-            lblTop.Location = new Point((int)(56 * scaleFactor), (int)(12 * scaleFactor));
-            lblTop.Font = new Font("Segoe UI", (float)(10 * scaleFactor), FontStyle.Bold);
+            lblTop.Size = new Size((int)(350 * scaleFactor), (int)(25 * scaleFactor)); // 280 * 1.25 = 350, 20 * 1.25 = 25
+            lblTop.Location = new Point((int)(70 * scaleFactor), (int)(15 * scaleFactor)); // 56 * 1.25 = 70, 12 * 1.25 = 15
+            lblTop.Font = new Font("Segoe UI", (float)(12.5 * scaleFactor), FontStyle.Bold); // 10 * 1.25 = 12.5
             
-            lblTitle.Size = new Size((int)(280 * scaleFactor), (int)(40 * scaleFactor));
-            lblTitle.Location = new Point((int)(56 * scaleFactor), (int)(32 * scaleFactor));
-            lblTitle.Font = new Font("Segoe UI", (float)(9 * scaleFactor));
+            lblTitle.Size = new Size((int)(350 * scaleFactor), (int)(50 * scaleFactor)); // 280 * 1.25 = 350, 40 * 1.25 = 50
+            lblTitle.Location = new Point((int)(70 * scaleFactor), (int)(40 * scaleFactor)); // 56 * 1.25 = 70, 32 * 1.25 = 40
+            lblTitle.Font = new Font("Segoe UI", (float)(11.25 * scaleFactor)); // 9 * 1.25 = 11.25
         }
 
         /// <summary>
