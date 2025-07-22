@@ -20,7 +20,7 @@ banner.exe "Your message here" "Optional title here"
 
 ### Named Arguments
 ```
-banner.exe --message "Your message" --title "Optional title" --image "image_path_or_base64" --position "topleft" --time 10 --sound "sound.wav" --color "#FF0000" --exit
+banner.exe --message "Your message" --title "Optional title" --image "image_path_or_base64" --position "topleft" --time 10 --sound "sound.wav" --color "#FF0000" --size 100 --exit
 ```
 You can use any of the following prefixes for each argument: `--`, `-`, or `/` (e.g., `--message`, `-message`, `/message`).
 
@@ -32,6 +32,7 @@ You can use any of the following prefixes for each argument: `--`, `-`, or `/` (
 - `--time`: Time to display notification (seconds)
 - `--sound`: Path to WAV file or URL to play when notification is shown (defaults to Windows Notify System Generic.wav)
 - `--color`: Background color in hex format (e.g., `#FF0000` for red, `#80FF0000` for semi-transparent red)
+- `--size`: Size scaling factor (100 = default size, 150 = 150% larger, 50 = 50% smaller)
 - `--exit`: Exit the application after showing the notification
 
 ### Example
@@ -43,6 +44,8 @@ banner.exe --message "Download complete" --sound "https://example.com/notificati
 banner.exe --message "Silent notification" --sound ""  # Disable sound
 banner.exe --message "Red notification" --color "#FF0000"
 banner.exe --message "Semi-transparent blue" --color "#80FF0000"
+banner.exe --message "Large notification" --size 150
+banner.exe --message "Small notification" --size 75
 banner.exe --message "Exit after notification" --exit
 ```
 

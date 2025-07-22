@@ -49,6 +49,11 @@ for %%A in (%*) do (
     if /I "%%A"=="/test:14d" set "TEST_JUMP=14d"
     if /I "%%A"=="/test:14e" set "TEST_JUMP=14e"
     if /I "%%A"=="/test:15" set "TEST_JUMP=15"
+    if /I "%%A"=="/test:15b" set "TEST_JUMP=15b"
+    if /I "%%A"=="/test:16" set "TEST_JUMP=16"
+    if /I "%%A"=="/test:16b" set "TEST_JUMP=16b"
+    if /I "%%A"=="/test:16c" set "TEST_JUMP=16c"
+    if /I "%%A"=="/test:16d" set "TEST_JUMP=16d"
 )
 
 REM Jump to the requested test if specified
@@ -228,6 +233,31 @@ echo.
 :TEST_15b
 echo Test 15b: Sound from URL (if available)
 %START_CMD_MIN% --message "Sound from URL test" --title "Sound URL Test" --sound "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" --time %DEFAULT_TIME%
+timeout /t 3 /nobreak >nul
+echo.
+
+:TEST_16
+REM Test 16: Size scaling tests
+echo Test 16: Large size (150%%)
+%START_CMD_MIN% --message "Large notification" --title "Size Test" --size 150 --time %DEFAULT_TIME%
+timeout /t 3 /nobreak >nul
+echo.
+
+:TEST_16b
+echo Test 16b: Small size (75%%)
+%START_CMD_MIN% --message "Small notification" --title "Size Test" --size 75 --time %DEFAULT_TIME%
+timeout /t 3 /nobreak >nul
+echo.
+
+:TEST_16c
+echo Test 16c: Extra large size (200%%)
+%START_CMD_MIN% --message "Extra large notification" --title "Size Test" --size 200 --time %DEFAULT_TIME%
+timeout /t 3 /nobreak >nul
+echo.
+
+:TEST_16d
+echo Test 16d: Tiny size (50%%)
+%START_CMD_MIN% --message "Tiny notification" --title "Size Test" --size 50 --time %DEFAULT_TIME%
 timeout /t 3 /nobreak >nul
 echo.
 

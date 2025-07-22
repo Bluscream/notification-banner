@@ -15,6 +15,7 @@ namespace NotificationBanner {
         public bool Exit { get; set; } = false;
         public string? Color { get; set; } = string.Empty;
         public string? Sound { get; set; } = "C:\\Windows\\Media\\Windows Notify System Generic.wav";
+        public string? Size { get; set; } = "100";
 
         public static Config Load(string[] args) {
             var exePath = Assembly.GetEntryAssembly()?.Location ?? System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? AppContext.BaseDirectory ?? Environment.GetCommandLineArgs().FirstOrDefault() ?? ".";
@@ -87,6 +88,7 @@ namespace NotificationBanner {
                         case "exit": Exit = true; break;
                         case "color": Color = value; break;
                         case "sound": Sound = value; break;
+                        case "size": Size = value; break;
                     }
                 }
             }

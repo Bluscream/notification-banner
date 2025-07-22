@@ -106,6 +106,31 @@ namespace NotificationBanner.Banner {
         }
 
         /// <summary>
+        /// Apply size scaling to the form and controls
+        /// </summary>
+        /// <param name="scaleFactor">Scale factor (100 = 100%, 150 = 150%, etc.)</param>
+        private void ApplySizeScaling(double scaleFactor) {
+            if (scaleFactor <= 0) scaleFactor = 1.0;
+            
+            // Scale form size
+            var baseWidth = 350;
+            var baseHeight = 80;
+            Size = new Size((int)(baseWidth * scaleFactor), (int)(baseHeight * scaleFactor));
+            
+            // Scale control sizes and positions
+            pbxLogo.Size = new Size((int)(32 * scaleFactor), (int)(32 * scaleFactor));
+            pbxLogo.Location = new Point((int)(12 * scaleFactor), (int)(12 * scaleFactor));
+            
+            lblTop.Size = new Size((int)(280 * scaleFactor), (int)(20 * scaleFactor));
+            lblTop.Location = new Point((int)(56 * scaleFactor), (int)(12 * scaleFactor));
+            lblTop.Font = new Font("Segoe UI", (float)(10 * scaleFactor), FontStyle.Bold);
+            
+            lblTitle.Size = new Size((int)(280 * scaleFactor), (int)(40 * scaleFactor));
+            lblTitle.Location = new Point((int)(56 * scaleFactor), (int)(32 * scaleFactor));
+            lblTitle.Font = new Font("Segoe UI", (float)(9 * scaleFactor));
+        }
+
+        /// <summary>
         /// Called internally to configure pass notification parameters
         /// </summary>
         /// <param name="data">The configuration data to setup the notification UI</param>
@@ -121,6 +146,13 @@ namespace NotificationBanner.Banner {
                 _timerHide.Tick += TimerHide_Tick!;
             } else {
                 _timerHide.Enabled = false;
+            }
+
+            // Apply size scaling
+            var sizeArg = string.IsNullOrWhiteSpace(data.Config.Size) ? "100" : data.Config.Size;
+            if (double.TryParse(sizeArg, out double sizeValue)) {
+                var scaleFactor = sizeValue / 100.0;
+                ApplySizeScaling(scaleFactor);
             }
 
             if (data.Image != null) {
