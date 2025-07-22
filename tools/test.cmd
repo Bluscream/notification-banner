@@ -54,6 +54,7 @@ for %%A in (%*) do (
     if /I "%%A"=="/test:16b" set "TEST_JUMP=16b"
     if /I "%%A"=="/test:16c" set "TEST_JUMP=16c"
     if /I "%%A"=="/test:16d" set "TEST_JUMP=16d"
+    if /I "%%A"=="/test:17" set "TEST_JUMP=17"
 )
 
 REM Jump to the requested test if specified
@@ -261,6 +262,13 @@ echo Test 16d: Tiny size (50%%)
 timeout /t 3 /nobreak >nul
 echo.
 
+:TEST_17
+REM Test 17: Primary screen test
+echo Test 17: Primary screen notification
+%START_CMD_MIN% --message "This should appear on the primary screen" --title "Primary Screen Test" --primary --time %DEFAULT_TIME%
+timeout /t 3 /nobreak >nul
+echo.
+
 :TEST_13
 @REM echo Test 13: Overfill the notification queue (should skip some notifications)
 @REM for /L %%i in (1,1,120) do (
@@ -268,8 +276,6 @@ echo.
 @REM )
 @REM timeout /t 5 /nobreak >nul
 @REM echo.
-
-pause
 
 :TEST_14
 echo Test 14: Exit after notification (should exit immediately)
@@ -287,7 +293,7 @@ echo.
 echo All tests completed!
 echo.
 
-pause
+@REM pause
 call tools\kill.cmd
 
 goto :EOF

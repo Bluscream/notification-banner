@@ -31,13 +31,6 @@ namespace NotificationBanner.Banner {
         private MemoryStream? _soundStream;
 
         /// <summary>
-        /// Get the Screen object
-        /// </summary>
-        private static Screen GetScreen() {
-            return (false ? Screen.PrimaryScreen : Screen.FromPoint(Cursor.Position))!; // bool.Parse(ConfigurationManager.AppSettings["NotifyUsingPrimaryScreen"])
-        }
-
-        /// <summary>
         /// Constructor for the <see cref="BannerForm"/> class
         /// </summary>
         public BannerForm() {

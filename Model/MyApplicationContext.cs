@@ -5,7 +5,6 @@ using NotificationBanner;
 
 namespace NotificationBanner.Model {
     internal class MyApplicationContext : System.Windows.Forms.ApplicationContext {
-        private readonly static Size MaxImageSize = new Size() { Width = 40, Height = 40 };
         private readonly NotificationQueue _notificationQueue;
         private BannerForm? _bannerForm;
         private System.Windows.Forms.Timer? _queueTimer;
@@ -54,7 +53,7 @@ namespace NotificationBanner.Model {
             toastData.Config = config;
             var parsedImage = imageArg?.ParseImage();
             if (parsedImage != null) toastData.Image = parsedImage.Resize(new Size() { Width = maxImageSize, Height = maxImageSize });
-            toastData.Position = ParsePosition(posArg);
+            toastData.Position = ParsePosition(posArg, config.Primary);
             return toastData;
         }
 
@@ -68,8 +67,13 @@ namespace NotificationBanner.Model {
             return BannerPositionEnum.TopLeft;
         }
 
-        private static (int x, int y) GetScreenPosition(BannerPositionEnum pos, int width, int height, int offset = 0) {
-            var screen = System.Windows.Forms.Screen.FromPoint(System.Windows.Forms.Cursor.Position);
+        private static (int x, int y) GetScreenPosition(BannerPositionEnum pos, int width, int height, int offset = 0, bool usePrimaryScreen = false) {
+            var screen = usePrimaryScreen ? System.Windows.Forms.Screen.PrimaryScreen : System.Windows.Forms.Screen.FromPoint(System.Windows.Forms.Cursor.Position);
+            if (screen?.Bounds == null) {
+                // Fallback to primary screen if cursor screen is null
+                screen = System.Windows.Forms.Screen.PrimaryScreen;
+            }
+            
             int x = 0, y = 0;
             switch (pos) {
                 case BannerPositionEnum.TopLeft:
@@ -104,9 +108,9 @@ namespace NotificationBanner.Model {
             return (x, y);
         }
 
-        private BannerData.PositionDelegate ParsePosition(string posArg) {
+        private BannerData.PositionDelegate ParsePosition(string posArg, bool usePrimaryScreen = false) {
             var posEnum = ParsePositionEnum(posArg);
-            return (formWidth, formHeight, offset) => GetScreenPosition(posEnum, formWidth, formHeight, offset);
+            return (formWidth, formHeight, offset) => GetScreenPosition(posEnum, formWidth, formHeight, offset, usePrimaryScreen);
         }
     }
 }
