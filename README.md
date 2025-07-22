@@ -7,6 +7,8 @@ C# app to send custom Windows notifications, useful for alternate shells like [C
 > [!NOTE]
 > This project is a complete rework of [Bluscream/notify-toast](https://github.com/Bluscream/notify-toast).
 
+![banner.exe --message "This is a basic notification for screenshot purposes." --title "Screenshot Test" --time 15](https://files.catbox.moe/6rp9tq.png)
+
 ## Usage
 
 You can run the app with either positional arguments or named arguments:
