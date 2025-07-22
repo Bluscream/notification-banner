@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <SelfContained>false</SelfContained>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>notification_banner</RootNamespace>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <AssemblyName>banner</AssemblyName>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+    <Version>3.0.0.2</Version>
+    <Authors>Bluscream, Belphemur, Cursor AI</Authors>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="NotificationListener\**" />
+    <None Remove="NotificationListener\**" />
+    <Content Remove="NotificationListener\**" />
+  </ItemGroup>
+</Project>
