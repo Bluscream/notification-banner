@@ -20,17 +20,19 @@ banner.exe "Your message here" "Optional title here"
 
 ### Named Arguments
 ```
-banner.exe --message "Your message" --title "Optional title" --image "image_path_or_base64" --position "topleft" --time 10 --sound "sound.wav"
+banner.exe --message "Your message" --title "Optional title" --image "image_path_or_base64" --position "topleft" --time 10 --sound "sound.wav" --color "#FF0000" --exit
 ```
 You can use any of the following prefixes for each argument: `--`, `-`, or `/` (e.g., `--message`, `-message`, `/message`).
 
 #### Arguments
 - `--message` (required if not using positional): The notification message
 - `--title`: The notification title
-- `--image`: Image path or base64 string
+- `--image`: Image path, url or base64 string
 - `--position`: Banner position as a string (e.g., `topleft`, `topright`, `bottomleft`, `bottomright`, `topcenter`, `bottomcenter`, `center`)
 - `--time`: Time to display notification (seconds)
-- `--sound`: Path to WAV file or URL to play when notification is shown (defaults to Windows notify sound)
+- `--sound`: Path to WAV file or URL to play when notification is shown (defaults to Windows Notify System Generic.wav)
+- `--color`: Background color in hex format (e.g., `#FF0000` for red, `#80FF0000` for semi-transparent red)
+- `--exit`: Exit the application after showing the notification
 
 ### Example
 ```
@@ -39,6 +41,9 @@ banner.exe --message "Hello world!" --position "bottomright" --time 5
 banner.exe --message "Alert!" --title "System Alert" --sound "C:\sounds\alert.wav"
 banner.exe --message "Download complete" --sound "https://example.com/notification.wav"
 banner.exe --message "Silent notification" --sound ""  # Disable sound
+banner.exe --message "Red notification" --color "#FF0000"
+banner.exe --message "Semi-transparent blue" --color "#80FF0000"
+banner.exe --message "Exit after notification" --exit
 ```
 
 ---
