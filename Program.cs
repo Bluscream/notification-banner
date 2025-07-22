@@ -12,8 +12,8 @@ namespace NotificationBanner {
     internal static class Program {
         private static WindowsFormsSynchronizationContext? _synchronizationContext;
         private static Mutex? _singleInstanceMutex;
-        private const string MutexName = "notify-toast-single-instance";
-        private const string PipeName = "notify-toast-pipe";
+        private const string MutexName = "notification-banner-single-instance";
+        private const string PipeName = "notification-banner-pipe";
         [DllImport("user32.dll")]
         private static extern bool SetProcessDPIAware();
 

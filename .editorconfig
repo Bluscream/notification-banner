@@ -1,4 +1,4 @@
-# .editorconfig for notify-toast
+# .editorconfig for notification-banner
 root = true
 
 [*.{cs,csx}]

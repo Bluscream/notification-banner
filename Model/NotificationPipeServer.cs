@@ -6,7 +6,7 @@ using NotificationBanner;
 
 namespace NotificationBanner.Model {
     internal class NotificationPipeServer {
-        private const string PipeName = "notify-toast-pipe";
+        private const string PipeName = "notification-banner-pipe";
         public void StartServer(Action<Config> onNotificationReceived) {
             Task.Run(async () => {
                 while (true) {

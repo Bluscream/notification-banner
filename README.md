@@ -1,9 +1,11 @@
 # notification-banner
 
-**Version:** 4.0.0.0
 **Authors:** Bluscream, Belphemur, Cursor AI
 
 C# app to send custom Windows notifications, useful for alternate shells like [CairoDesktop](https://github.com/cairoshell/cairoshell) or automation scripts.
+
+> [!NOTE]
+> This project is a complete rework of [Bluscream/notify-toast](https://github.com/Bluscream/notify-toast).
 
 ## Usage
 
