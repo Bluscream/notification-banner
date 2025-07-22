@@ -1,6 +1,6 @@
 # notification-banner
 
-**Version:** 2.0.0.0  
+**Version:** 4.0.0.0
 **Authors:** Bluscream, Belphemur, Cursor AI
 
 C# app to send custom Windows notifications, useful for alternate shells like [CairoDesktop](https://github.com/cairoshell/cairoshell) or automation scripts.
@@ -28,7 +28,7 @@ You can use any of the following prefixes for each argument: `--`, `-`, or `/` (
 - `--image`: Image path or base64 string
 - `--position`: Banner position as a string (e.g., `topleft`, `topright`, `bottomleft`, `bottomright`, `topcenter`, `bottomcenter`, `center`)
 - `--time`: Time to display notification (seconds)
-- `--sound`: Path to WAV file or URL to play when notification is shown (defaults to Windows Unlock sound)
+- `--sound`: Path to WAV file or URL to play when notification is shown (defaults to Windows notify sound)
 
 ### Example
 ```
