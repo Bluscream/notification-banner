@@ -10,10 +10,15 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <AssemblyName>banner</AssemblyName>
     <NoWarn>$(NoWarn);CA1416</NoWarn>
-    <Version>4.0.0.0</Version>
+    <Version>4.0.1.0</Version>
     <Authors>Bluscream, Belphemur, Cursor AI</Authors>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    
+    <!-- Single-file publishing properties -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="NotificationListener\**" />

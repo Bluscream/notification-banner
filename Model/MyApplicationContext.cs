@@ -33,7 +33,7 @@ namespace NotificationBanner.Model {
                     _bannerForm.Disposed += (s, e) => {
                         _bannerForm = null;
                         if (_currentConfig != null && _currentConfig.Exit) {
-                            NotificationBanner.Util.Utils.TryExitApplication();
+                            Utils.TryExitApplication();
                         } else {
                             ProcessQueue(); // Immediately process the next notification
                         }
