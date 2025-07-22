@@ -36,6 +36,38 @@ You can use any of the following prefixes for each argument: `--`, `-`, or `/` (
 - `--primary`: Force banner to always appear on the primary screen (default: uses screen with cursor)
 - `--exit`: Exit the application after showing the notification
 
+### Default Images
+The application supports automatic image selection based on the notification title using regex patterns. If no `--image` argument is provided via command line, the system will check if the title matches any patterns defined in the `DefaultImages` configuration.
+
+#### How it works
+1. When a notification is created without an explicit `--image` parameter
+2. The system checks the notification title against regex patterns in the `DefaultImages` dictionary
+3. If a match is found, the corresponding image URL/path is automatically set
+4. The first matching pattern takes precedence
+
+#### Configuration
+DefaultImages can be configured in the JSON configuration files (both program-level and user-level). The configuration uses regex patterns as keys and image URLs/paths as values:
+
+```json
+{
+  "DefaultImages": {
+    "HASS\\.Agent": "https://www.hass-agent.io/2.1/assets/images/logo/logo-256.png",
+    "error|fail|critical": "C:/Images/error.png",
+    "success|ok|done": "C:/Images/success.png",
+    "info|notice": "C:/Images/info.png"
+  }
+}
+```
+
+#### Default Images Example
+```
+banner.exe "Agent is running" "HASS.Agent"  # Will automatically use the HASS.Agent logo
+banner.exe --message "Operation failed" --title "Error occurred"  # Will use error.png if configured
+banner.exe --message "Task completed" --title "Success"  # Will use success.png if configured
+```
+
+**Note:** The `--image` command line argument always takes precedence over automatic image selection.
+
 ### Example
 ```
 banner.exe "Hello world!" "My Title"
