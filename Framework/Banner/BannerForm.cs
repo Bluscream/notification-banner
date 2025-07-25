@@ -141,7 +141,7 @@ namespace NotificationBanner.Banner {
                 var scaleFactor = sizeValue / 100.0;
                 ApplySizeScaling(scaleFactor);
             }
-            pbxLogo.Image = data.Image ?? CreateDefaultIcon();
+            pbxLogo.Image = data.Image ?? Utils.CreateDefaultIcon();
             ApplyBackgroundColorAndOpacity(data.Config.Color);
             _hiding = false;
             lblTop.Text = data.Config.Title ?? string.Empty;
@@ -161,33 +161,9 @@ namespace NotificationBanner.Banner {
         /// Parse color and opacity from a string and apply to the form.
         /// </summary>
         private void ApplyBackgroundColorAndOpacity(string? colorString) {
-            var (color, opacity) = ParseColorAndOpacity(colorString);
+            var (color, opacity) = Utils.ParseColorAndOpacity(colorString, DefaultBackColor, DefaultOpacity);
             BackColor = color;
             Opacity = opacity;
-        }
-
-        /// <summary>
-        /// Parse a color string (AARRGGBB or RRGGBB) and return (Color, Opacity)
-        /// </summary>
-        private static (Color, double) ParseColorAndOpacity(string? colorString) {
-            if (!string.IsNullOrWhiteSpace(colorString)) {
-                try {
-                    var colorStr = colorString.TrimStart('#');
-                    if (colorStr.Length == 8) {
-                        var a = Convert.ToByte(colorStr.Substring(0, 2), 16);
-                        var r = Convert.ToByte(colorStr.Substring(2, 2), 16);
-                        var g = Convert.ToByte(colorStr.Substring(4, 2), 16);
-                        var b = Convert.ToByte(colorStr.Substring(6, 2), 16);
-                        return (Color.FromArgb(r, g, b), a / 255.0);
-                    } else if (colorStr.Length == 6) {
-                        var r = Convert.ToByte(colorStr.Substring(0, 2), 16);
-                        var g = Convert.ToByte(colorStr.Substring(2, 2), 16);
-                        var b = Convert.ToByte(colorStr.Substring(4, 2), 16);
-                        return (Color.FromArgb(r, g, b), DefaultOpacity);
-                    }
-                } catch { }
-            }
-            return (DefaultBackColor, DefaultOpacity);
         }
 
         /// <summary>
@@ -308,22 +284,6 @@ namespace NotificationBanner.Banner {
                     //Ignored
                 }
             }
-        }
-
-        private Bitmap CreateDefaultIcon() {
-            var bitmap = new Bitmap(32, 32);
-            using (var g = Graphics.FromImage(bitmap)) {
-                g.FillRectangle(new SolidBrush(Color.FromArgb(30, 30, 30)), 0, 0, 32, 32);
-                using (var pen = new Pen(Color.Orange, 2)) {
-                    var points = new[] {
-                        new Point(10, 8),
-                        new Point(22, 16),
-                        new Point(10, 24)
-                    };
-                    g.DrawLines(pen, points);
-                }
-            }
-            return bitmap;
         }
     }
 }
