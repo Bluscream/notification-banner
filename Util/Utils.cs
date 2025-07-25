@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management;
+
 
 public static class Utils {
     [DllImport("kernel32.dll")]
@@ -20,11 +22,8 @@ public static class Utils {
 
     [DllImport("user32.dll")]
     private static extern bool GetFocusAssistState(out int state);
-
     private const int SW_HIDE = 0;
     private const int SW_SHOW = 5;
-    
-    // Focus Assist (Do Not Disturb) states
     private const int FOCUS_ASSIST_OFF = 0;
     private const int FOCUS_ASSIST_PRIORITY_ONLY = 1;
     private const int FOCUS_ASSIST_ALARMS_ONLY = 2;
@@ -102,10 +101,6 @@ public static class Utils {
                     }
                 }
             }
-        }
-        catch (System.Management.ManagementException)
-        {
-            // Ignore, will return false below
         }
         } catch (Exception ex) {
             Console.WriteLine($"[Utils] IsDoNotDisturbActiveFocusAssistRegistry failed: {ex.Message}");
