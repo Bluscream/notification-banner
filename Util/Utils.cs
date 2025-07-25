@@ -60,56 +60,47 @@ public static class Utils {
         return null;
     }
 
-    public static bool IsDoNotDisturbActive() {
-        try {
-            if (GetFocusAssistState(out int state)) {
-                return state == FOCUS_ASSIST_PRIORITY_ONLY || state == FOCUS_ASSIST_ALARMS_ONLY;
-            }
-        } catch (Exception ex) {
-            Console.WriteLine($"[Utils] Focus Assist API failed: {ex.Message}");
-        }
+    private static bool IsDoNotDisturbActiveRegistry() {
         try {
             using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Notifications\Settings");
             if (key?.GetValue("NOC_GLOBAL_SETTING_TOASTS_ENABLED") is object value) {
                 return value.ToString() == "0"; // Toasts disabled = Do Not Disturb
             }
         } catch (Exception ex) {
-            Console.WriteLine($"[Utils] Registry fallback failed: {ex.Message}");
+            Console.WriteLine($"[Utils] IsDoNotDisturbActiveRegistry failed: {ex.Message}");
         }
-        
         return false;
+    }
+    private static bool IsDoNotDisturbActiveFocusAssist() {
+        try {
+            if (GetFocusAssistState(out int state)) {
+                return state == FOCUS_ASSIST_PRIORITY_ONLY || state == FOCUS_ASSIST_ALARMS_ONLY;
+            }
+        } catch (Exception ex) {
+            Console.WriteLine($"[Utils] IsDoNotDisturbActiveFocusAssist failed: {ex.Message}");
+        }
+        return false;
+    }
+    public static bool IsDoNotDisturbActive() {
+        return IsDoNotDisturbActiveRegistry() || IsDoNotDisturbActiveFocusAssist();
     }
 
     public static void TryExitApplication()
     {
-        try
-        {
-            // Try graceful exit
+        try {
             System.Windows.Forms.Application.Exit();
-            // Give a moment for the app to exit
             System.Threading.Thread.Sleep(500);
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             Console.Error.WriteLine($"Application.Exit() failed: {ex}");
         }
-        try
-        {
-            // Try environment exit
+        try {
             Environment.Exit(0);
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             Console.Error.WriteLine($"Environment.Exit() failed: {ex}");
-        }
-        try
-        {
-            // Last resort: kill the process
+        } try {
             var process = Process.GetCurrentProcess();
             process.Kill();
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             Console.Error.WriteLine($"Process.Kill() failed: {ex}");
         }
     }
