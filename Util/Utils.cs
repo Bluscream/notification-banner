@@ -22,21 +22,30 @@ public static class Utils {
 
     [DllImport("user32.dll")]
     private static extern bool GetFocusAssistState(out int state);
-    private const int SW_HIDE = 0;
-    private const int SW_SHOW = 5;
-    private const int FOCUS_ASSIST_OFF = 0;
-    private const int FOCUS_ASSIST_PRIORITY_ONLY = 1;
-    private const int FOCUS_ASSIST_ALARMS_ONLY = 2;
+
+    private enum ShowWindowCommand
+    {
+        SW_HIDE = 0,
+        SW_SHOW = 5
+    }
+    
+    // Focus Assist (Do Not Disturb) states
+    private enum FocusAssistState
+    {
+        OFF = 0,
+        PRIORITY_ONLY = 1,
+        ALARMS_ONLY = 2
+    }
 
     public static void HideConsoleWindow() {
         try {
             var handle = GetConsoleWindow();
             if (handle != IntPtr.Zero) {
-                ShowWindow(handle, SW_HIDE);
+                ShowWindow(handle, (int)ShowWindowCommand.SW_HIDE);
             }
             var process = Process.GetCurrentProcess();
             if (process != null && process.MainWindowHandle != IntPtr.Zero) {
-                ShowWindow(process.MainWindowHandle, SW_HIDE);
+                ShowWindow(process.MainWindowHandle, (int)ShowWindowCommand.SW_HIDE);
             }
         } catch (Exception ex) {
             Console.Error.WriteLine($"Error: {ex}");
@@ -73,7 +82,7 @@ public static class Utils {
     private static bool IsDoNotDisturbActiveFocusAssist() {
         try {
             if (GetFocusAssistState(out int state)) {
-                return state == FOCUS_ASSIST_PRIORITY_ONLY || state == FOCUS_ASSIST_ALARMS_ONLY;
+                return state == (int)FocusAssistState.PRIORITY_ONLY || state == (int)FocusAssistState.ALARMS_ONLY;
             }
         } catch (Exception ex) {
             Console.WriteLine($"[Utils] IsDoNotDisturbActiveFocusAssist failed: {ex.Message}");
@@ -82,11 +91,6 @@ public static class Utils {
     }
     private static bool IsDoNotDisturbActiveFocusAssistCim() {
         try {
-        const int FOCUS_ASSIST_OFF = 0;
-        const int FOCUS_ASSIST_PRIORITY_ONLY = 1;
-        const int FOCUS_ASSIST_ALARMS_ONLY = 2;
-        try
-        {
             var scope = new System.Management.ManagementScope(@"\\.\root\cimv2\mdm\dmmap");
             var query = new System.Management.ObjectQuery("SELECT QuietHoursState FROM MDM_Policy_Config_QuietHours");
             using (var searcher = new System.Management.ManagementObjectSearcher(scope, query))
@@ -97,13 +101,13 @@ public static class Utils {
                     var stateObj = obj["QuietHoursState"];
                     if (stateObj != null && int.TryParse(stateObj.ToString(), out int state))
                     {
-                        return state == FOCUS_ASSIST_PRIORITY_ONLY || state == FOCUS_ASSIST_ALARMS_ONLY;
+                        return state == (int)FocusAssistState.PRIORITY_ONLY || state == (int)FocusAssistState.ALARMS_ONLY;
                     }
                 }
             }
         }
         } catch (Exception ex) {
-            Console.WriteLine($"[Utils] IsDoNotDisturbActiveFocusAssistRegistry failed: {ex.Message}");
+            Console.WriteLine($"[Utils] IsDoNotDisturbActiveFocusAssistCim failed: {ex.Message}");
         }
         return false;
     }
