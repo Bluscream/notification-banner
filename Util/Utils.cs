@@ -2,6 +2,8 @@ using System;
 using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Linq;
 
 public static class Utils {
     [DllImport("kernel32.dll")]
@@ -10,8 +12,22 @@ public static class Utils {
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+    [DllImport("user32.dll")]
+    private static extern bool GetFocusAssistState(out int state);
+
     private const int SW_HIDE = 0;
     private const int SW_SHOW = 5;
+    
+    // Focus Assist (Do Not Disturb) states
+    private const int FOCUS_ASSIST_OFF = 0;
+    private const int FOCUS_ASSIST_PRIORITY_ONLY = 1;
+    private const int FOCUS_ASSIST_ALARMS_ONLY = 2;
 
     public static void HideConsoleWindow() {
         try {
@@ -42,6 +58,26 @@ public static class Utils {
             }
         }
         return null;
+    }
+
+    public static bool IsDoNotDisturbActive() {
+        try {
+            if (GetFocusAssistState(out int state)) {
+                return state == FOCUS_ASSIST_PRIORITY_ONLY || state == FOCUS_ASSIST_ALARMS_ONLY;
+            }
+        } catch (Exception ex) {
+            Console.WriteLine($"[Utils] Focus Assist API failed: {ex.Message}");
+        }
+        try {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Notifications\Settings");
+            if (key?.GetValue("NOC_GLOBAL_SETTING_TOASTS_ENABLED") is object value) {
+                return value.ToString() == "0"; // Toasts disabled = Do Not Disturb
+            }
+        } catch (Exception ex) {
+            Console.WriteLine($"[Utils] Registry fallback failed: {ex.Message}");
+        }
+        
+        return false;
     }
 
     public static void TryExitApplication()

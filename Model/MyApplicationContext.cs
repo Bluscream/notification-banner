@@ -26,6 +26,14 @@ namespace NotificationBanner.Model {
             if (_bannerForm != null && _bannerForm.Visible) return;
             if (_notificationQueue.TryDequeue(out var config) && config != null) {
                 _currentConfig = config;
+                
+                // Check if Do Not Disturb is active and notification is not marked as important
+                if (Utils.IsDoNotDisturbActive() && !config.Important) {
+                    Console.WriteLine($"[AppContext] Skipping notification due to Do Not Disturb mode: {config.Title} - {config.Message}");
+                    ProcessQueue(); // Process next notification immediately
+                    return;
+                }
+                
                 var toastData = CreateBannerData(config);
                 Console.WriteLine($"[AppContext] Showing notification: {toastData?.Config?.Title} - {toastData?.Config?.Message}");
                 if (_bannerForm == null || _bannerForm.IsDisposed) {

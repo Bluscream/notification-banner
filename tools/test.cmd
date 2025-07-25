@@ -55,6 +55,8 @@ for %%A in (%*) do (
     if /I "%%A"=="/test:16c" set "TEST_JUMP=16c"
     if /I "%%A"=="/test:16d" set "TEST_JUMP=16d"
     if /I "%%A"=="/test:17" set "TEST_JUMP=17"
+    if /I "%%A"=="/test:18" set "TEST_JUMP=18"
+    if /I "%%A"=="/test:19" set "TEST_JUMP=19"
 )
 
 REM Jump to the requested test if specified
@@ -266,6 +268,20 @@ echo.
 REM Test 17: Primary screen test
 echo Test 17: Primary screen notification
 %START_CMD_MIN% --message "This should appear on the primary screen" --title "Primary Screen Test" --primary --time %DEFAULT_TIME%
+timeout /t 3 /nobreak >nul
+echo.
+
+:TEST_18
+REM Test 18: Important notification (should show even in Do Not Disturb mode)
+echo Test 18: Important notification test
+%START_CMD_MIN% --message "This is an important notification that should show even in Do Not Disturb mode" --title "Important Test" --important --time %DEFAULT_TIME%
+timeout /t 3 /nobreak >nul
+echo.
+
+:TEST_19
+REM Test 19: Regular notification (should be blocked in Do Not Disturb mode)
+echo Test 19: Regular notification test (may be blocked if Do Not Disturb is active)
+%START_CMD_MIN% --message "This is a regular notification that should be blocked in Do Not Disturb mode" --title "Regular Test" --time %DEFAULT_TIME%
 timeout /t 3 /nobreak >nul
 echo.
 

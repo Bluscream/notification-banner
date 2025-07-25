@@ -1,1 +1,1 @@
-powershell -ExecutionPolicy Bypass -Command "publish.ps1" -github -csproj notification-banner.csproj
+powershell -ExecutionPolicy Bypass -Command "publish.ps1" -git -github -csproj notification-banner.csproj
