@@ -161,38 +161,33 @@ namespace NotificationBanner.Banner {
         /// Parse color and opacity from a string and apply to the form.
         /// </summary>
         private void ApplyBackgroundColorAndOpacity(string? colorString) {
+            var (color, opacity) = ParseColorAndOpacity(colorString);
+            BackColor = color;
+            Opacity = opacity;
+        }
+
+        /// <summary>
+        /// Parse a color string (AARRGGBB or RRGGBB) and return (Color, Opacity)
+        /// </summary>
+        private static (Color, double) ParseColorAndOpacity(string? colorString) {
             if (!string.IsNullOrWhiteSpace(colorString)) {
                 try {
                     var colorStr = colorString.TrimStart('#');
-                    Color color;
-                    double opacity = DefaultOpacity;
                     if (colorStr.Length == 8) {
                         var a = Convert.ToByte(colorStr.Substring(0, 2), 16);
                         var r = Convert.ToByte(colorStr.Substring(2, 2), 16);
                         var g = Convert.ToByte(colorStr.Substring(4, 2), 16);
                         var b = Convert.ToByte(colorStr.Substring(6, 2), 16);
-                        color = Color.FromArgb(r, g, b);
-                        opacity = a / 255.0;
+                        return (Color.FromArgb(r, g, b), a / 255.0);
                     } else if (colorStr.Length == 6) {
                         var r = Convert.ToByte(colorStr.Substring(0, 2), 16);
                         var g = Convert.ToByte(colorStr.Substring(2, 2), 16);
                         var b = Convert.ToByte(colorStr.Substring(4, 2), 16);
-                        color = Color.FromArgb(r, g, b);
-                        opacity = DefaultOpacity;
-                    } else {
-                        color = DefaultBackColor;
-                        opacity = DefaultOpacity;
+                        return (Color.FromArgb(r, g, b), DefaultOpacity);
                     }
-                    BackColor = color;
-                    Opacity = opacity;
-                } catch {
-                    BackColor = DefaultBackColor;
-                    Opacity = DefaultOpacity;
-                }
-            } else {
-                BackColor = DefaultBackColor;
-                Opacity = DefaultOpacity;
+                } catch { }
             }
+            return (DefaultBackColor, DefaultOpacity);
         }
 
         /// <summary>
@@ -220,7 +215,7 @@ namespace NotificationBanner.Banner {
         }
 
         /// <summary>
-        /// Stop current sound playback and dispose resources
+        /// Stop current sound playback and dispose resources, and cancel any sound download
         /// </summary>
         private void StopSound() {
             try {
@@ -229,6 +224,9 @@ namespace NotificationBanner.Banner {
                 _soundPlayer = null;
                 _soundStream?.Dispose();
                 _soundStream = null;
+                _cancellationTokenSource?.Cancel();
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = new();
             } catch (Exception ex) {
                 LogError($"[Sound] Error stopping sound: {ex.Message}");
             }
@@ -259,23 +257,12 @@ namespace NotificationBanner.Banner {
         }
 
         /// <summary>
-        /// Destroy current sound player (if any)
-        /// </summary>
-        private void DestroySound() {
-            StopSound();
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
-            _cancellationTokenSource = new();
-        }
-
-        /// <summary>
         /// Clean up any resources being used.
         /// </summary>
         protected override void Dispose(bool disposing) {
             if (disposing) {
                 _timerHide?.Dispose();
                 StopSound();
-                _cancellationTokenSource?.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -295,7 +282,6 @@ namespace NotificationBanner.Banner {
             _hiding = true;
             if (_timerHide != null)
                 _timerHide.Enabled = false;
-            DestroySound();
             FadeOut();
         }
 
