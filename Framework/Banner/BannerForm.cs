@@ -17,6 +17,22 @@ namespace NotificationBanner.Banner {
     /// This class implements the UI form used to show a Banner notification.
     /// </summary>
     public partial class BannerForm : Form {
+        // --- Constants ---
+        private const int BaseWidth = 438;
+        private const int BaseHeight = 100;
+        private const int BaseLogoSize = 40;
+        private const int BaseLogoMargin = 15;
+        private const int BaseLabelWidth = 350;
+        private const int BaseLabelHeightTop = 25;
+        private const int BaseLabelHeightTitle = 50;
+        private const int BaseLabelMarginLeft = 70;
+        private const int BaseLabelMarginTop = 15;
+        private const int BaseLabelMarginTitleTop = 40;
+        private const float BaseFontSizeTop = 12.5f;
+        private const float BaseFontSizeTitle = 11.25f;
+        private const double DefaultOpacity = 0.9;
+        private static readonly Color DefaultBackColor = Color.FromArgb(45, 45, 45);
+
         private Timer? _timerHide;
         private bool _hiding;
         private BannerData? _currentData;
@@ -35,27 +51,26 @@ namespace NotificationBanner.Banner {
         /// </summary>
         public BannerForm() {
             StartPosition = FormStartPosition.Manual;
-            Size = new System.Drawing.Size(438, 100); // 350 * 1.25 = 438, 80 * 1.25 = 100
+            Size = new Size(BaseWidth, BaseHeight);
             TopMost = true;
             FormBorderStyle = FormBorderStyle.None;
             ShowInTaskbar = false;
-            BackColor = System.Drawing.Color.FromArgb(45, 45, 45);
-            ForeColor = System.Drawing.Color.White;
-            Padding = new System.Windows.Forms.Padding(0);
+            BackColor = DefaultBackColor;
+            ForeColor = Color.White;
+            Padding = new Padding(0);
 
-            // Create UI controls
             pbxLogo = new PictureBox {
-                Size = new Size(40, 40), // 32 * 1.25 = 40
-                Location = new Point(15, 15), // 12 * 1.25 = 15
+                Size = new Size(BaseLogoSize, BaseLogoSize),
+                Location = new Point(BaseLogoMargin, BaseLogoMargin),
                 SizeMode = PictureBoxSizeMode.Zoom,
                 BackColor = Color.Transparent
             };
 
             lblTop = new Label {
                 AutoSize = false,
-                Size = new Size(350, 25), // 280 * 1.25 = 350, 20 * 1.25 = 25
-                Location = new Point(70, 15), // 56 * 1.25 = 70, 12 * 1.25 = 15
-                Font = new Font("Segoe UI", 12.5f, FontStyle.Bold), // 10 * 1.25 = 12.5
+                Size = new Size(BaseLabelWidth, BaseLabelHeightTop),
+                Location = new Point(BaseLabelMarginLeft, BaseLabelMarginTop),
+                Font = new Font("Segoe UI", BaseFontSizeTop, FontStyle.Bold),
                 ForeColor = Color.White,
                 BackColor = Color.Transparent,
                 TextAlign = ContentAlignment.MiddleLeft
@@ -63,9 +78,9 @@ namespace NotificationBanner.Banner {
 
             lblTitle = new Label {
                 AutoSize = false,
-                Size = new Size(350, 50), // 280 * 1.25 = 350, 40 * 1.25 = 50
-                Location = new Point(70, 40), // 56 * 1.25 = 70, 32 * 1.25 = 40
-                Font = new Font("Segoe UI", 11.25f), // 9 * 1.25 = 11.25
+                Size = new Size(BaseLabelWidth, BaseLabelHeightTitle),
+                Location = new Point(BaseLabelMarginLeft, BaseLabelMarginTitleTop),
+                Font = new Font("Segoe UI", BaseFontSizeTitle),
                 ForeColor = Color.LightGray,
                 BackColor = Color.Transparent,
                 TextAlign = ContentAlignment.TopLeft
@@ -74,13 +89,6 @@ namespace NotificationBanner.Banner {
             Controls.Add(pbxLogo);
             Controls.Add(lblTop);
             Controls.Add(lblTitle);
-
-            // Remove focus/activation logic
-            // this.Shown += (s, e) => {
-            //     this.TopMost = true;
-            //     this.BringToFront();
-            //     this.Activate();
-            // };
         }
 
         protected override bool ShowWithoutActivation => true;
@@ -88,10 +96,7 @@ namespace NotificationBanner.Banner {
         protected override CreateParams CreateParams {
             get {
                 var cp = base.CreateParams;
-                // turn on WS_EX_TOOLWINDOW style bit
-                // Used to hide the banner from alt+tab
-                cp.ExStyle |= 0x80;
-                // Add WS_EX_TRANSPARENT (0x20) and WS_EX_NOACTIVATE (0x8000000)
+                cp.ExStyle |= 0x80; // WS_EX_TOOLWINDOW
                 cp.ExStyle |= 0x20; // WS_EX_TRANSPARENT
                 cp.ExStyle |= 0x8000000; // WS_EX_NOACTIVATE
                 return cp;
@@ -104,23 +109,15 @@ namespace NotificationBanner.Banner {
         /// <param name="scaleFactor">Scale factor (100 = 100%, 150 = 150%, etc.)</param>
         private void ApplySizeScaling(double scaleFactor) {
             if (scaleFactor <= 0) scaleFactor = 1.0;
-            
-            // Scale form size
-            var baseWidth = 438; // 350 * 1.25 = 438
-            var baseHeight = 100; // 80 * 1.25 = 100
-            Size = new Size((int)(baseWidth * scaleFactor), (int)(baseHeight * scaleFactor));
-            
-            // Scale control sizes and positions
-            pbxLogo.Size = new Size((int)(40 * scaleFactor), (int)(40 * scaleFactor)); // 32 * 1.25 = 40
-            pbxLogo.Location = new Point((int)(15 * scaleFactor), (int)(15 * scaleFactor)); // 12 * 1.25 = 15
-            
-            lblTop.Size = new Size((int)(350 * scaleFactor), (int)(25 * scaleFactor)); // 280 * 1.25 = 350, 20 * 1.25 = 25
-            lblTop.Location = new Point((int)(70 * scaleFactor), (int)(15 * scaleFactor)); // 56 * 1.25 = 70, 12 * 1.25 = 15
-            lblTop.Font = new Font("Segoe UI", (float)(12.5 * scaleFactor), FontStyle.Bold); // 10 * 1.25 = 12.5
-            
-            lblTitle.Size = new Size((int)(350 * scaleFactor), (int)(50 * scaleFactor)); // 280 * 1.25 = 350, 40 * 1.25 = 50
-            lblTitle.Location = new Point((int)(70 * scaleFactor), (int)(40 * scaleFactor)); // 56 * 1.25 = 70, 32 * 1.25 = 40
-            lblTitle.Font = new Font("Segoe UI", (float)(11.25 * scaleFactor)); // 9 * 1.25 = 11.25
+            Size = new Size((int)(BaseWidth * scaleFactor), (int)(BaseHeight * scaleFactor));
+            pbxLogo.Size = new Size((int)(BaseLogoSize * scaleFactor), (int)(BaseLogoSize * scaleFactor));
+            pbxLogo.Location = new Point((int)(BaseLogoMargin * scaleFactor), (int)(BaseLogoMargin * scaleFactor));
+            lblTop.Size = new Size((int)(BaseLabelWidth * scaleFactor), (int)(BaseLabelHeightTop * scaleFactor));
+            lblTop.Location = new Point((int)(BaseLabelMarginLeft * scaleFactor), (int)(BaseLabelMarginTop * scaleFactor));
+            lblTop.Font = new Font("Segoe UI", (float)(BaseFontSizeTop * scaleFactor), FontStyle.Bold);
+            lblTitle.Size = new Size((int)(BaseLabelWidth * scaleFactor), (int)(BaseLabelHeightTitle * scaleFactor));
+            lblTitle.Location = new Point((int)(BaseLabelMarginLeft * scaleFactor), (int)(BaseLabelMarginTitleTop * scaleFactor));
+            lblTitle.Font = new Font("Segoe UI", (float)(BaseFontSizeTitle * scaleFactor));
         }
 
         /// <summary>
@@ -131,138 +128,99 @@ namespace NotificationBanner.Banner {
             if (_currentData != null && _currentData.Priority > data.Priority) {
                 return;
             }
-
             _currentData = data;
-            var ttl = TimeSpan.FromSeconds(int.TryParse(data.Config.Time, out int seconds) ? seconds : 10);
+            var ttl = TimeSpan.FromSeconds(int.TryParse(data.Config.Time, out var seconds) ? seconds : 10);
             if (_timerHide == null) {
                 _timerHide = new Timer { Interval = (int)ttl.TotalMilliseconds };
                 _timerHide.Tick += TimerHide_Tick!;
             } else {
                 _timerHide.Enabled = false;
             }
-
-            // Apply size scaling
             var sizeArg = string.IsNullOrWhiteSpace(data.Config.Size) ? "100" : data.Config.Size;
-            if (double.TryParse(sizeArg, out double sizeValue)) {
+            if (double.TryParse(sizeArg, out var sizeValue)) {
                 var scaleFactor = sizeValue / 100.0;
                 ApplySizeScaling(scaleFactor);
             }
-
-            if (data.Image != null) {
-                pbxLogo.Image = data.Image;
-            } else {
-                pbxLogo.Image = CreateDefaultIcon();
+            pbxLogo.Image = data.Image ?? CreateDefaultIcon();
+            ApplyBackgroundColorAndOpacity(data.Config.Color);
+            _hiding = false;
+            lblTop.Text = data.Config.Title ?? string.Empty;
+            lblTitle.Text = data.Config.Message ?? string.Empty;
+            Region = Region.FromHrgn(RoundedCorner.CreateRoundRectRgn(0, 0, Width, Height, 20, 20));
+            if (data.Position != null) {
+                var (x, y) = data.Position(Width, Height, _currentOffset);
+                Location = new Point(x, y);
             }
+            _timerHide.Enabled = true;
+            if (!Visible) Show();
+            TopMost = true;
+            PlaySoundAsync(data.Config.Sound);
+        }
 
-            // Handle background color and opacity from config
-            var config = data.Config;
-            if (!string.IsNullOrWhiteSpace(config.Color)) {
+        /// <summary>
+        /// Parse color and opacity from a string and apply to the form.
+        /// </summary>
+        private void ApplyBackgroundColorAndOpacity(string? colorString) {
+            if (!string.IsNullOrWhiteSpace(colorString)) {
                 try {
-                    var colorStr = config.Color.TrimStart('#');
+                    var colorStr = colorString.TrimStart('#');
                     Color color;
-                    double opacity = 0.9;
-                    if (colorStr.Length == 8) { // AARRGGBB
-                        byte a = Convert.ToByte(colorStr.Substring(0, 2), 16);
-                        byte r = Convert.ToByte(colorStr.Substring(2, 2), 16);
-                        byte g = Convert.ToByte(colorStr.Substring(4, 2), 16);
-                        byte b = Convert.ToByte(colorStr.Substring(6, 2), 16);
-                        color = Color.FromArgb(r, g, b); // Use RGB for BackColor
-                        opacity = a / 255.0;
-                    } else if (colorStr.Length == 6) { // RRGGBB
-                        byte r = Convert.ToByte(colorStr.Substring(0, 2), 16);
-                        byte g = Convert.ToByte(colorStr.Substring(2, 2), 16);
-                        byte b = Convert.ToByte(colorStr.Substring(4, 2), 16);
+                    double opacity = DefaultOpacity;
+                    if (colorStr.Length == 8) {
+                        var a = Convert.ToByte(colorStr.Substring(0, 2), 16);
+                        var r = Convert.ToByte(colorStr.Substring(2, 2), 16);
+                        var g = Convert.ToByte(colorStr.Substring(4, 2), 16);
+                        var b = Convert.ToByte(colorStr.Substring(6, 2), 16);
                         color = Color.FromArgb(r, g, b);
-                        opacity = 0.9;
+                        opacity = a / 255.0;
+                    } else if (colorStr.Length == 6) {
+                        var r = Convert.ToByte(colorStr.Substring(0, 2), 16);
+                        var g = Convert.ToByte(colorStr.Substring(2, 2), 16);
+                        var b = Convert.ToByte(colorStr.Substring(4, 2), 16);
+                        color = Color.FromArgb(r, g, b);
+                        opacity = DefaultOpacity;
                     } else {
-                        color = Color.FromArgb(45, 45, 45);
+                        color = DefaultBackColor;
+                        opacity = DefaultOpacity;
                     }
                     BackColor = color;
                     Opacity = opacity;
                 } catch {
-                    BackColor = Color.FromArgb(45, 45, 45);
-                    Opacity = 0.9;
+                    BackColor = DefaultBackColor;
+                    Opacity = DefaultOpacity;
                 }
             } else {
-                BackColor = Color.FromArgb(45, 45, 45);
-                Opacity = 0.9;
+                BackColor = DefaultBackColor;
+                Opacity = DefaultOpacity;
             }
-
-            _hiding = false;
-            lblTop.Text = config.Title ?? string.Empty;
-            lblTitle.Text = config.Message ?? string.Empty;
-            Region = Region.FromHrgn(RoundedCorner.CreateRoundRectRgn(0, 0, Width, Height, 20, 20));
-
-            if (data.Position != null) {
-                var (x, y) = data.Position(Width, Height, _currentOffset);
-                Location = new System.Drawing.Point(x, y);
-            }
-
-            _timerHide.Enabled = true;
-
-            Show();
-            TopMost = true; // Ensure always on top while visible
-            // Do not call BringToFront or Activate
-
-            // Play sound if specified
-            PlaySound(config.Sound);
         }
 
         /// <summary>
-        /// Play sound from file path or URL
+        /// Play sound from file path or URL (async, disposes previous player/stream)
         /// </summary>
-        /// <param name="soundPath">Path to WAV file or URL</param>
-        private void PlaySound(string? soundPath) {
+        private async void PlaySoundAsync(string? soundPath) {
             if (string.IsNullOrWhiteSpace(soundPath)) return;
-
+            StopSound();
             try {
-                // Stop any currently playing sound
-                StopSound();
-
-                // Create new sound player
                 _soundPlayer = new SoundPlayer();
-
-                // Check if it's a URL
-                if (Uri.TryCreate(soundPath, UriKind.Absolute, out var uri) && 
+                if (Uri.TryCreate(soundPath, UriKind.Absolute, out var uri) &&
                     (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)) {
-                    // Download and play from URL
-                    Task.Run(async () => {
-                        try {
-                            using var httpClient = new System.Net.Http.HttpClient();
-                            var audioData = await httpClient.GetByteArrayAsync(uri);
-                            var stream = new MemoryStream(audioData);
-                            // Assign and play on UI thread
-                            if (this.InvokeRequired) {
-                                this.Invoke(new Action(() => {
-                                    try {
-                                        _soundStream = stream;
-                                        _soundPlayer.Stream = _soundStream;
-                                        _soundPlayer.Play();
-                                    } catch (Exception ex) {
-                                        Console.WriteLine($"[Sound] Error on UI thread: {ex.Message}");
-                                    }
-                                }));
-                            } else {
-                                _soundStream = stream;
-                                _soundPlayer.Stream = _soundStream;
-                                _soundPlayer.Play();
-                            }
-                        } catch (Exception ex) {
-                            Console.WriteLine($"[Sound] Error playing sound from URL {soundPath}: {ex.Message}");
-                        }
-                    });
+                    using var httpClient = new System.Net.Http.HttpClient();
+                    var audioData = await httpClient.GetByteArrayAsync(uri);
+                    _soundStream = new MemoryStream(audioData);
+                    _soundPlayer.Stream = _soundStream;
+                    _soundPlayer.Play();
                 } else {
-                    // Play from local file
                     _soundPlayer.SoundLocation = soundPath;
                     _soundPlayer.Play();
                 }
             } catch (Exception ex) {
-                Console.WriteLine($"[Sound] Error playing sound {soundPath}: {ex.Message}");
+                LogError($"[Sound] Error playing sound {soundPath}: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Stop current sound playback
+        /// Stop current sound playback and dispose resources
         /// </summary>
         private void StopSound() {
             try {
@@ -272,23 +230,26 @@ namespace NotificationBanner.Banner {
                 _soundStream?.Dispose();
                 _soundStream = null;
             } catch (Exception ex) {
-                Console.WriteLine($"[Sound] Error stopping sound: {ex.Message}");
+                LogError($"[Sound] Error stopping sound: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Centralized error logging
+        /// </summary>
+        private void LogError(string message) {
+            Console.WriteLine(message);
         }
 
         /// <summary>
         /// Update Location of banner depending of the position change
         /// </summary>
-        /// <param name="positionChange"></param>
-        /// <param name="opacityChange"></param>
-        /// <param name="hideChange"></param>
         public void UpdateLocationOpacity(int positionChange, double opacityChange, int hideChange) {
             _currentOffset += positionChange;
-            if (_currentData != null && _currentData.Position != null)
-                {
-                    var (x, y) = _currentData.Position(Width, Height, _currentOffset);
-                    Location = new System.Drawing.Point(x, y);
-                }
+            if (_currentData != null && _currentData.Position != null) {
+                var (x, y) = _currentData.Position(Width, Height, _currentOffset);
+                Location = new Point(x, y);
+            }
             Opacity -= opacityChange;
             _hide -= hideChange;
             if (Opacity <= 0.0 || _hide <= 0) {
@@ -310,22 +271,18 @@ namespace NotificationBanner.Banner {
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing) {
             if (disposing) {
                 _timerHide?.Dispose();
                 StopSound();
                 _cancellationTokenSource?.Dispose();
             }
-
             base.Dispose(disposing);
         }
 
         /// <summary>
         /// Event handler for the "hiding" timer.
         /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">Arguments of the event</param>
         private void TimerHide_Tick(object sender, EventArgs e) {
             TriggerHidingDisposal();
         }
@@ -335,7 +292,6 @@ namespace NotificationBanner.Banner {
         /// </summary>
         private void TriggerHidingDisposal() {
             if (_hiding) return;
-
             _hiding = true;
             if (_timerHide != null)
                 _timerHide.Enabled = false;
@@ -352,12 +308,10 @@ namespace NotificationBanner.Banner {
             try {
                 while (Opacity > 0.0) {
                     await Task.Delay(50);
-
                     if (!_hiding)
                         break;
                     Opacity -= 0.05;
                 }
-
                 if (_hiding) {
                     Dispose();
                 }
@@ -373,11 +327,9 @@ namespace NotificationBanner.Banner {
         private Bitmap CreateDefaultIcon() {
             var bitmap = new Bitmap(32, 32);
             using (var g = Graphics.FromImage(bitmap)) {
-                // Dark background
                 g.FillRectangle(new SolidBrush(Color.FromArgb(30, 30, 30)), 0, 0, 32, 32);
-                // Orange > symbol
                 using (var pen = new Pen(Color.Orange, 2)) {
-                    var points = new Point[] {
+                    var points = new[] {
                         new Point(10, 8),
                         new Point(22, 16),
                         new Point(10, 24)
