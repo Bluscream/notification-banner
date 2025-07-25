@@ -6,7 +6,7 @@
     <RootNamespace>notification_banner</RootNamespace>
     <AssemblyName>banner</AssemblyName>
     <NoWarn>$(NoWarn);CA1416</NoWarn>
-    <Version>4.0.1.4</Version>
+    <Version>4.0.1.7</Version>
     <Authors>Bluscream, Belphemur, Cursor AI</Authors>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>

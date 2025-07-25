@@ -81,8 +81,39 @@ public static class Utils {
         }
         return false;
     }
+    private static bool IsDoNotDisturbActiveFocusAssistCim() {
+        try {
+        const int FOCUS_ASSIST_OFF = 0;
+        const int FOCUS_ASSIST_PRIORITY_ONLY = 1;
+        const int FOCUS_ASSIST_ALARMS_ONLY = 2;
+        try
+        {
+            var scope = new System.Management.ManagementScope(@"\\.\root\cimv2\mdm\dmmap");
+            var query = new System.Management.ObjectQuery("SELECT QuietHoursState FROM MDM_Policy_Config_QuietHours");
+            using (var searcher = new System.Management.ManagementObjectSearcher(scope, query))
+            using (var results = searcher.Get())
+            {
+                foreach (System.Management.ManagementObject obj in results)
+                {
+                    var stateObj = obj["QuietHoursState"];
+                    if (stateObj != null && int.TryParse(stateObj.ToString(), out int state))
+                    {
+                        return state == FOCUS_ASSIST_PRIORITY_ONLY || state == FOCUS_ASSIST_ALARMS_ONLY;
+                    }
+                }
+            }
+        }
+        catch (System.Management.ManagementException)
+        {
+            // Ignore, will return false below
+        }
+        } catch (Exception ex) {
+            Console.WriteLine($"[Utils] IsDoNotDisturbActiveFocusAssistRegistry failed: {ex.Message}");
+        }
+        return false;
+    }
     public static bool IsDoNotDisturbActive() {
-        return IsDoNotDisturbActiveRegistry() || IsDoNotDisturbActiveFocusAssist();
+        return IsDoNotDisturbActiveRegistry() || IsDoNotDisturbActiveFocusAssist() || IsDoNotDisturbActiveFocusAssistCim();
     }
 
     public static void TryExitApplication()
