@@ -105,7 +105,6 @@ public static class Utils {
                     }
                 }
             }
-        }
         } catch (Exception ex) {
             Console.WriteLine($"[Utils] IsDoNotDisturbActiveFocusAssistCim failed: {ex.Message}");
         }
