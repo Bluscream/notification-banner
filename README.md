@@ -112,8 +112,8 @@ banner.exe --message "Task completed" --title "Success"  # Will use success.png 
 
 The application supports configuration files for setting defaults:
 
-- **Program-level**: `banner.json` in the executable directory
-- **User-level**: `banner.json` in the user's home directory
+- **Program-level**: `%PROGRAMDATA%\banner.json`
+- **User-level**: `%USERPROFILE%\banner.json`
 
 User-level configuration overrides program-level settings. Command line arguments override both.
 
