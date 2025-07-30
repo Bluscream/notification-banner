@@ -44,21 +44,27 @@ banner.exe --message "Your message" --title "Optional title" --image "image_path
 ```
 You can use any of the following prefixes for each argument: `--`, `-`, or `/` (e.g., `--message`, `-message`, `/message`).
 
-#### Arguments
-- `--message` (required if not using positional): The notification message
-- `--title`: The notification title
-- `--image`: Image path, url or base64 string
-- `--position`: Banner position as a string (e.g., `topleft`, `topright`, `bottomleft`, `bottomright`, `topcenter`, `bottomcenter`, `center`)
-- `--time`: Time to display notification (seconds)
-- `--sound`: Path to WAV file or URL to play when notification is shown (defaults to Windows Notify System Generic.wav)
-- `--color`: Background color in hex format (e.g., `#FF0000` for red, `#80FF0000` for semi-transparent red)
-- `--size`: Size scaling factor (100 = default size, 150 = 150% larger, 50 = 50% smaller)
-- `--primary`: Force banner to always appear on the primary screen (default: uses screen with cursor)
-- `--important`: Mark notification as important (bypasses Do Not Disturb mode)
-- `--exit`: Exit the application after showing the notification
-- `--api-listen-addresses`: Comma-separated list of addresses to listen on for HTTP requests (e.g., "localhost:31415,0.0.0.0:8080")
-- `--log-file`: Path to log file (default: no file logging)
-- `--console`: Show console window and enable console output (default: hidden)
+## Configuration Reference
+
+| Parameter | Description | Default | Command Line | JSON Config | HTTP Query | IPC JSON |
+|-----------|-------------|---------|--------------|-------------|------------|----------|
+| `message` | The notification message | `""` | `--message "text"` | `"Message": "text"` | `?message=text` | `"Message": "text"` |
+| `title` | The notification title | `"Notification"` | `--title "text"` | `"Title": "text"` | `?title=text` | `"Title": "text"` |
+| `image` | Image path, URL or base64 string | `""` | `--image "path/url"` | `"Image": "path/url"` | `?image=path/url` | `"Image": "path/url"` |
+| `position` | Banner position on screen | `"topleft"` | `--position "pos"` | `"Position": "pos"` | `?position=pos` | `"Position": "pos"` |
+| `time` | Display time in seconds | `"10"` | `--time "15"` | `"Time": "15"` | `?time=15` | `"Time": "15"` |
+| `sound` | Path to WAV file or URL | `"C:\Windows\Media\Windows Notify System Generic.wav"` | `--sound "path"` | `"Sound": "path"` | `?sound=path` | `"Sound": "path"` |
+| `color` | Background color (hex) | `""` | `--color "#FF0000"` | `"Color": "#FF0000"` | `?color=%23FF0000` | `"Color": "#FF0000"` |
+| `size` | Size scaling factor (50-200) | `"100"` | `--size "150"` | `"Size": "150"` | `?size=150` | `"Size": "150"` |
+| `primary` | Force primary screen | `false` | `--primary` | `"Primary": true` | `?primary=true` | `"Primary": true` |
+| `important` | Bypass Do Not Disturb | `false` | `--important` | `"Important": true` | `?important=true` | `"Important": true` |
+| `exit` | Exit after notification | `false` | `--exit` | `"Exit": true` | `?exit=true` | `"Exit": true` |
+| `api-listen-addresses` | HTTP server addresses | `"0.0.0.0:14969,[::]:14696"` | `--api-listen-addresses "addr"` | `"ApiListenAddresses": "addr"` | ❌ | ❌ |
+| `log-file` | Path to log file | `""` | `--log-file "path"` | `"LogFile": "path"` | ❌ | ❌ |
+| `console` | Show console window | `false` | `--console` | `"Console": true` | ❌ | ❌ |
+| `default-images` | Regex patterns for auto-images | `{"HASS\\.Agent": "..."}` | ❌ | `"DefaultImages": {...}` | ❌ | ❌ |
+
+**Position Values:** `topleft`, `topright`, `bottomleft`, `bottomright`, `topcenter`, `bottomcenter`, `center`
 
 ## Do Not Disturb Mode
 
@@ -120,27 +126,7 @@ The application supports configuration files for setting defaults:
 
 User-level configuration overrides program-level settings. Command line arguments override both.
 
-### Example Configuration
-```json
-{
-  "Message": "",
-  "Title": "Notification",
-  "Time": "10",
-  "Position": "topleft",
-  "Exit": false,
-  "Color": "",
-  "Sound": "C:\\Windows\\Media\\Windows Notify System Generic.wav",
-  "Size": "100",
-  "Primary": false,
-  "Important": false,
-  "ApiListenAddresses": "0.0.0.0:14969,[::]:14696",
-  "LogFile": "C:\\Logs\\banner.log",
-  "Console": false,
-  "DefaultImages": {
-    "HASS\\.Agent": "https://www.hass-agent.io/2.1/assets/images/logo/logo-256.png"
-  }
-}
-```
+
 
 ## Examples
 
@@ -239,18 +225,7 @@ response = requests.get("http://localhost:31415/", params={
 - `GET` - Send notification via query parameters
 - `POST` - Send notification via query parameters
 
-**Available Query Parameters:**
-- `message` (required) - The notification message
-- `title` - The notification title (default: "Notification")
-- `time` - Display time in seconds (default: "10")
-- `position` - Position on screen (default: "topleft")
-- `image` - Image URL or path
-- `color` - Background color in hex format
-- `size` - Size scaling factor (default: "100")
-- `sound` - Sound file path or URL
-- `primary` - Force primary screen (true/false)
-- `important` - Bypass Do Not Disturb (true/false)
-- `exit` - Exit after notification (true/false)
+
 
 **Response Format:**
 ```json
