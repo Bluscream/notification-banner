@@ -35,6 +35,7 @@ namespace NotificationBanner {
         public string? LogFile { get; set; } = Path.Combine(Path.GetTempPath(), "banner.log");
         public bool Console { get; set; } = false;
         public bool CreateDefaultConfig { get; set; } = false;
+        public bool TrayIcon { get; set; } = true;
         public Dictionary<string, string> DefaultImages { get; set; } = new Dictionary<string, string> {
             { @"HASS\.Agent", "https://www.hass-agent.io/2.1/assets/images/logo/logo-256.png" }
         };
@@ -103,6 +104,8 @@ namespace NotificationBanner {
                             break;
                         case "log-file": LogFile = value; break;
                         case "console": Console = true; break;
+                        case "trayicon": TrayIcon = true; break;
+                        case "no-trayicon": TrayIcon = false; break;
                     }
                 }
             }
@@ -150,6 +153,9 @@ namespace NotificationBanner {
                 
                 if (queryParams.ContainsKey("important"))
                     Important = queryParams["important"]?.ToLowerInvariant() == "true";
+                
+                if (queryParams.ContainsKey("trayicon"))
+                    TrayIcon = queryParams["trayicon"]?.ToLowerInvariant() == "true";
 
                 if (queryParams.ContainsKey("max-notifications"))
                     if (int.TryParse(queryParams["max-notifications"], out int maxNotifications))
@@ -181,20 +187,45 @@ namespace NotificationBanner {
             return copy;
         }
 
+        public static void CreateDefaultConfigs() {
+            var exePath = Bluscream.Utils.GetOwnPath();
+            var globalConfigPath = Environment.SpecialFolder.CommonApplicationData.CombineFile(exePath.FileNameWithoutExtension() + ".json");
+            var programConfigPath = exePath.ReplaceExtension("json");
+            var userConfigPath = Environment.SpecialFolder.UserProfile.CombineFile(exePath.FileNameWithoutExtension() + ".json");
+            var config = new Config();
+            if (globalConfigPath.Exists != true) {
+                config.SaveToFile(globalConfigPath.FullName);
+            }
+            if (programConfigPath.Exists != true) {
+                config.SaveToFile(programConfigPath.FullName);
+            }
+            if (userConfigPath.Exists != true) {
+                config.SaveToFile(userConfigPath.FullName);
+            }
+        }
+
+        public static Config LoadFromFiles(Config config) {
+            var exePath = Bluscream.Utils.GetOwnPath();
+            var globalConfigPath = Environment.SpecialFolder.CommonApplicationData.CombineFile(exePath.FileNameWithoutExtension() + ".json");
+            var programConfigPath = exePath.ReplaceExtension("json");
+            var userConfigPath = Environment.SpecialFolder.UserProfile.CombineFile(exePath.FileNameWithoutExtension() + ".json");
+            if (globalConfigPath.Exists == true) {
+                config.LoadFromFile(globalConfigPath.FullName);
+            }
+            if (programConfigPath.Exists == true) {
+                config.LoadFromFile(programConfigPath.FullName);
+            }
+            if (userConfigPath.Exists == true) {
+                config.LoadFromFile(userConfigPath.FullName);
+            }
+            return config;
+        }
+        
         public static Config Load(string[] args) {
             var exePath = Bluscream.Utils.GetOwnPath();
 
             var config = new Config();
-            config.GlobalConfigPath = Environment.SpecialFolder.CommonApplicationData.CombineFile(exePath.FileNameWithoutExtension() + ".json");
-            config.ProgramConfigPath = exePath.ReplaceExtension("json");
-            config.UserConfigPath = Environment.SpecialFolder.UserProfile.CombineFile(exePath.FileNameWithoutExtension() + ".json");
-            if (config.GlobalConfigPath?.Exists == true) {
-                config.LoadFromFile(config.GlobalConfigPath.FullName);
-            } else if (config.ProgramConfigPath?.Exists == true) {
-                config.LoadFromFile(config.ProgramConfigPath.FullName);
-            } else if (config.UserConfigPath?.Exists == true) {
-                config.LoadFromFile(config.UserConfigPath.FullName);
-            }
+            config = LoadFromFiles(config);
 
             bool imageSetByCmd = false;
             if (args.Length == 1 && !(args[0].StartsWith("-") || args[0].StartsWith("/"))) {
