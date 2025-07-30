@@ -6,62 +6,17 @@ using Bluscream;
 namespace NotificationBanner.Model {
     internal class MyApplicationContext : System.Windows.Forms.ApplicationContext {
         private readonly NotificationQueue _notificationQueue;
-        private BannerForm? _bannerForm;
-        private System.Windows.Forms.Timer? _queueTimer;
+        private NotificationManager? _notificationManager;
         private Config? _currentConfig;
         private WebServer? _webServer;
         internal MyApplicationContext(NotificationQueue notificationQueue, Config config) {
             _notificationQueue = notificationQueue;
             _notificationQueue.SetConfigForLogging(config);
-            StartQueueProcessing();
+            _notificationManager = new NotificationManager(notificationQueue, config, CreateBannerData);
             StartWebServer(config);
         }
 
-        private void StartQueueProcessing() {
-            _queueTimer = new System.Windows.Forms.Timer();
-            _queueTimer.Interval = 100; // Check every 0.1s for faster response
-            _queueTimer.Tick += (s, e) => ProcessQueue();
-            ProcessQueue(); // Call before starting the timer
-            _queueTimer.Start();
-        }
-
-        private void ProcessQueue() {
-            // If there's already a visible form, dispose it to show new notifications immediately
-            if (_bannerForm != null && _bannerForm.Visible) {
-                _bannerForm.Dispose();
-                _bannerForm = null;
-            }
-            
-            if (_notificationQueue.TryDequeue(out var config) && config != null) {
-                _currentConfig = config;
-                
-                // Check if Do Not Disturb is active and notification is not marked as important
-                if (Bluscream.Utils.IsDoNotDisturbActive() && !config.Important) {
-                    Utils.Log(config, $"[AppContext] Skipping notification due to Do Not Disturb mode: {config.Title} - {config.Message}");
-                    ProcessQueue(); // Process next notification immediately
-                    return;
-                }
-                
-                var toastData = CreateBannerData(config);
-                
-                // Create new banner form
-                _bannerForm = new BannerForm();
-                _bannerForm.Disposed += (s, e) => {
-                    _bannerForm = null;
-                    if (_currentConfig != null && _currentConfig.Exit) {
-                        Bluscream.Utils.Exit(0);
-                    } else {
-                        // Process next notification immediately for faster response
-                        ProcessQueue();
-                    }
-                };
-                
-                _bannerForm.SetData(toastData!);
-                _bannerForm.Show();
-            }
-        }
-
-        private BannerData CreateBannerData(Config config) {
+        public BannerData CreateBannerData(Config config) {
             var imageArg = string.IsNullOrWhiteSpace(config.Image) ? null : config.Image;
             var posArg = string.IsNullOrWhiteSpace(config.Position) ? "0" : config.Position;
             var maxImageSize = 40;
@@ -155,6 +110,8 @@ namespace NotificationBanner.Model {
         {
             if (disposing)
             {
+                _notificationManager?.Dispose();
+                _notificationManager = null;
                 _webServer?.Stop();
                 _webServer = null;
             }

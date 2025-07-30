@@ -6,7 +6,7 @@
     <RootNamespace>notification_banner</RootNamespace>
     <AssemblyName>banner</AssemblyName>
     <NoWarn>$(NoWarn);CA1416;NU1701</NoWarn>
-    <Version>4.0.2.4</Version>
+    <Version>4.0.2.5</Version>
     <Authors>Bluscream, Belphemur, Cursor AI</Authors>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
@@ -21,6 +21,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Bluscream/notification-banner</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <IgnoreWarnings>$(IgnoreWarnings);SYSLIB0012</IgnoreWarnings>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Blucream.Common\Blucream.Common.csproj">

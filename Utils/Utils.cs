@@ -4,7 +4,7 @@ using NotificationBanner;
 
 public static partial class Utils
 {
-    public static void Log(Config config, string message, params object[] args)
+    public static void Log(Config? config, string message, params object[] args)
     {
         string formattedMessage;
         try
@@ -20,12 +20,12 @@ public static partial class Utils
         var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         var logMessage = $"[{timestamp}] {formattedMessage}";
         
-        if (config.Console)
+        if (config?.Console ?? true)
         {
             Console.WriteLine(logMessage);
         }
         
-        if (!string.IsNullOrWhiteSpace(config.LogFile))
+        if (!string.IsNullOrWhiteSpace(config?.LogFile ?? "banner.log"))
         {
             try
             {

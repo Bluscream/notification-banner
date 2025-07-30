@@ -141,15 +141,16 @@ namespace NotificationBanner.Model
                 // Handle GET requests
                 if (method.Equals("GET", StringComparison.OrdinalIgnoreCase))
                 {
-                    _config.ParseUrl(url, clientIp);
+                    var requestConfig = _config.Copy();
+                    requestConfig.ParseUrl(url, clientIp);
                     
-                    if (string.IsNullOrWhiteSpace(_config.Message))
+                    if (string.IsNullOrWhiteSpace(requestConfig.Message))
                     {
                         await SendHttpResponse(writer, "Missing 'message' parameter", 400);
                         return;
                     }
                     
-                    _notificationQueue.Enqueue(_config);
+                    _notificationQueue.Enqueue(requestConfig);
                     
                     await SendHttpResponse(writer, "Notification queued successfully", 200);
                 }

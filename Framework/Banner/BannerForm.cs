@@ -40,6 +40,7 @@ namespace NotificationBanner.Banner {
         private int _currentOffset;
         private int _hide = 100;
         public Guid Id { get; } = Guid.NewGuid();
+        public bool IsDisposed { get; private set; }
         private Label lblTop;
         private Label lblTitle;
         private PictureBox pbxLogo;
@@ -223,6 +224,19 @@ namespace NotificationBanner.Banner {
         }
 
         /// <summary>
+        /// Update the offset for this banner and reposition it
+        /// </summary>
+        public void UpdateOffset(int newOffset) {
+            if (IsDisposed || _hiding) return; // Don't update if disposing or hiding
+            
+            _currentOffset = newOffset;
+            if (_currentData != null && _currentData.Position != null) {
+                var (x, y) = _currentData.Position(Width, Height, _currentOffset);
+                Location = new Point(x, y);
+            }
+        }
+
+        /// <summary>
         /// Update Location of banner depending of the position change
         /// </summary>
         public void UpdateLocationOpacity(int positionChange, double opacityChange, int hideChange) {
@@ -244,6 +258,8 @@ namespace NotificationBanner.Banner {
         /// </summary>
         protected override void Dispose(bool disposing) {
             if (disposing) {
+                Utils.Log(_currentData?.Config, $"[BannerForm] Disposing banner: Title='{_currentData?.Config?.Title}', Message='{_currentData?.Config?.Message}', Offset={_currentOffset}, Hiding={_hiding}, IsDisposed={IsDisposed}");
+                IsDisposed = true;
                 _timerHide?.Dispose();
                 StopSound();
             }
@@ -254,6 +270,7 @@ namespace NotificationBanner.Banner {
         /// Event handler for the "hiding" timer.
         /// </summary>
         private void TimerHide_Tick(object sender, EventArgs e) {
+            Utils.Log(_currentData?.Config, $"[BannerForm] TimerHide_Tick: Title='{_currentData?.Config?.Title}', Message='{_currentData?.Config?.Message}', Offset={_currentOffset}, Hiding={_hiding}, IsDisposed={IsDisposed}");
             TriggerHidingDisposal();
         }
 
@@ -261,6 +278,7 @@ namespace NotificationBanner.Banner {
         /// Trigger hiding the banner and dispose when done fading out.
         /// </summary>
         private void TriggerHidingDisposal() {
+            Utils.Log(_currentData?.Config, $"[BannerForm] TriggerHidingDisposal: Title='{_currentData?.Config?.Title}', Message='{_currentData?.Config?.Message}', Offset={_currentOffset}, Hiding={_hiding}, IsDisposed={IsDisposed}");
             if (_hiding) return;
             _hiding = true;
             if (_timerHide != null)

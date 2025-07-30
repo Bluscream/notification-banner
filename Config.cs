@@ -30,6 +30,7 @@ namespace NotificationBanner {
         public string? Size { get; set; } = "100";
         public bool Primary { get; set; } = false;
         public bool Important { get; set; } = false;
+        public int MaxNotificationsOnScreen { get; set; } = 4;
         public int ApiListenPort { get; set; } = 14969;
         public string? LogFile { get; set; } = Path.Combine(Path.GetTempPath(), "banner.log");
         public bool Console { get; set; } = false;
@@ -46,59 +47,6 @@ namespace NotificationBanner {
         
         [JsonIgnore]
         internal System.Diagnostics.Stopwatch? TimingStopwatch { get; set; }
-
-        public static Config Load(string[] args) {
-            var exePath = Bluscream.Utils.GetOwnPath();
-
-            var config = new Config();
-            config.GlobalConfigPath = Environment.SpecialFolder.CommonApplicationData.CombineFile(exePath.FileNameWithoutExtension() + ".json");
-            config.ProgramConfigPath = exePath.ReplaceExtension("json");
-            config.UserConfigPath = Environment.SpecialFolder.UserProfile.CombineFile(exePath.FileNameWithoutExtension() + ".json");
-            if (config.GlobalConfigPath?.Exists ?? false) {
-                config.LoadFromFile(config.GlobalConfigPath.FullName);
-            } else if (config.ProgramConfigPath?.Exists ?? false) {
-                config.LoadFromFile(config.ProgramConfigPath.FullName);
-            } else if (config.UserConfigPath?.Exists ?? false) {
-                config.LoadFromFile(config.UserConfigPath.FullName);
-            }
-
-            bool imageSetByCmd = false;
-            if (args.Length == 1 && !(args[0].StartsWith("-") || args[0].StartsWith("/"))) {
-                config.Message = args[0];
-            } else if (args.Length == 2 && !(args[0].StartsWith("-") || args[0].StartsWith("/") || args[1].StartsWith("-") || args[1].StartsWith("/"))) {
-                config.Message = args[0];
-                config.Title = args[1];
-            } else {
-                // Check if --image or similar was provided
-                for (int i = 0; i < args.Length; i++) {
-                    var arg = args[i];
-                    if ((arg.StartsWith("--") || arg.StartsWith("-") || arg.StartsWith("/")) && arg.Length > 1) {
-                        var key = arg.TrimStart('-','/').ToLowerInvariant();
-                        if (key == "image") {
-                            imageSetByCmd = true;
-                            break;
-                        }
-                    }
-                }
-                config.ParseCommandLine(args);
-            }
-
-            if (!imageSetByCmd && !string.IsNullOrEmpty(config.Title)) {
-                foreach (var kvp in config.DefaultImages) {
-                    if (System.Text.RegularExpressions.Regex.IsMatch(config.Title, kvp.Key, System.Text.RegularExpressions.RegexOptions.IgnoreCase)) {
-                        config.Image = kvp.Value;
-                        break;
-                    }
-                }
-            }
-
-            if (config.CreateDefaultConfig) {
-                if (!config.GlobalConfigPath?.Exists ?? false) config.SaveToFile(config.GlobalConfigPath.FullName);
-                if (!config.ProgramConfigPath?.Exists ?? false) config.SaveToFile(config.ProgramConfigPath.FullName);
-                if (!config.UserConfigPath?.Exists ?? false) config.SaveToFile(config.UserConfigPath.FullName);
-            }
-            return config;
-        }
 
         public void LoadFromFile(string path) {
             try {
@@ -147,6 +95,9 @@ namespace NotificationBanner {
                         case "size": Size = value; break;
                         case "primary": Primary = true; break;
                         case "important": Important = true; break;
+                        case "max-notifications": 
+                            if (int.TryParse(value, out int maxNotifications)) MaxNotificationsOnScreen = maxNotifications; 
+                            break;
                         case "api-listen-port": 
                             if (int.TryParse(value, out int port)) ApiListenPort = port; 
                             break;
@@ -200,6 +151,10 @@ namespace NotificationBanner {
                 if (queryParams.ContainsKey("important"))
                     Important = queryParams["important"]?.ToLowerInvariant() == "true";
 
+                if (queryParams.ContainsKey("max-notifications"))
+                    if (int.TryParse(queryParams["max-notifications"], out int maxNotifications))
+                        MaxNotificationsOnScreen = maxNotifications;
+
                 // Handle image based on title (same logic as in Config.Load)
                 if (string.IsNullOrEmpty(Image) && !string.IsNullOrEmpty(Title))
                 {
@@ -213,6 +168,70 @@ namespace NotificationBanner {
                     }
                 }
             }
+        }
+
+        public Config Copy() {
+            var copy = new Config();
+            foreach (var prop in typeof(Config).GetProperties()) {
+                if (prop.CanWrite && prop.CanRead) {
+                    var value = prop.GetValue(this);
+                    prop.SetValue(copy, value);
+                }
+            }
+            return copy;
+        }
+
+        public static Config Load(string[] args) {
+            var exePath = Bluscream.Utils.GetOwnPath();
+
+            var config = new Config();
+            config.GlobalConfigPath = Environment.SpecialFolder.CommonApplicationData.CombineFile(exePath.FileNameWithoutExtension() + ".json");
+            config.ProgramConfigPath = exePath.ReplaceExtension("json");
+            config.UserConfigPath = Environment.SpecialFolder.UserProfile.CombineFile(exePath.FileNameWithoutExtension() + ".json");
+            if (config.GlobalConfigPath?.Exists ?? false) {
+                config.LoadFromFile(config.GlobalConfigPath.FullName);
+            } else if (config.ProgramConfigPath?.Exists ?? false) {
+                config.LoadFromFile(config.ProgramConfigPath.FullName);
+            } else if (config.UserConfigPath?.Exists ?? false) {
+                config.LoadFromFile(config.UserConfigPath.FullName);
+            }
+
+            bool imageSetByCmd = false;
+            if (args.Length == 1 && !(args[0].StartsWith("-") || args[0].StartsWith("/"))) {
+                config.Message = args[0];
+            } else if (args.Length == 2 && !(args[0].StartsWith("-") || args[0].StartsWith("/") || args[1].StartsWith("-") || args[1].StartsWith("/"))) {
+                config.Message = args[0];
+                config.Title = args[1];
+            } else {
+                // Check if --image or similar was provided
+                for (int i = 0; i < args.Length; i++) {
+                    var arg = args[i];
+                    if ((arg.StartsWith("--") || arg.StartsWith("-") || arg.StartsWith("/")) && arg.Length > 1) {
+                        var key = arg.TrimStart('-','/').ToLowerInvariant();
+                        if (key == "image") {
+                            imageSetByCmd = true;
+                            break;
+                        }
+                    }
+                }
+                config.ParseCommandLine(args);
+            }
+
+            if (!imageSetByCmd && !string.IsNullOrEmpty(config.Title)) {
+                foreach (var kvp in config.DefaultImages) {
+                    if (System.Text.RegularExpressions.Regex.IsMatch(config.Title, kvp.Key, System.Text.RegularExpressions.RegexOptions.IgnoreCase)) {
+                        config.Image = kvp.Value;
+                        break;
+                    }
+                }
+            }
+
+            if (config.CreateDefaultConfig) {
+                if (!config.GlobalConfigPath?.Exists ?? false) config.SaveToFile(config.GlobalConfigPath.FullName);
+                if (!config.ProgramConfigPath?.Exists ?? false) config.SaveToFile(config.ProgramConfigPath.FullName);
+                if (!config.UserConfigPath?.Exists ?? false) config.SaveToFile(config.UserConfigPath.FullName);
+            }
+            return config;
         }
     }
 }
