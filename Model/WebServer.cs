@@ -289,59 +289,6 @@ namespace NotificationBanner.Model
             return result;
         }
 
-        private List<string> GetNetworkInterfaceAddresses()
-        {
-            var addresses = new List<string>();
-            
-            try
-            {
-                // Always include localhost (doesn't require admin privileges)
-                addresses.Add("127.0.0.1");
-                
-                // Try to get network interfaces, but don't fail if we can't
-                try
-                {
-                    var networkInterfaces = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
-                    
-                    foreach (var networkInterface in networkInterfaces)
-                    {
-                        // Only include interfaces that are up and not loopback
-                        if (networkInterface.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up &&
-                            networkInterface.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
-                        {
-                            var ipProperties = networkInterface.GetIPProperties();
-                            
-                            foreach (var ipAddress in ipProperties.UnicastAddresses)
-                            {
-                                // Only include IPv4 addresses
-                                if (ipAddress.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                                {
-                                    var ip = ipAddress.Address.ToString();
-                                    if (!addresses.Contains(ip))
-                                    {
-                                        addresses.Add(ip);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Utils.Log(_config, $"[WebServer] Could not enumerate network interfaces: {ex.Message}. Using localhost only.");
-                }
-                
-                Utils.Log(_config, $"[WebServer] Found {addresses.Count} network interfaces to bind to");
-            }
-            catch (Exception ex)
-            {
-                Utils.LogError(_config, "Error getting network interfaces", ex);
-                // Fallback to localhost only
-                addresses.Clear();
-                addresses.Add("127.0.0.1");
-            }
-            
-            return addresses;
-        }
+
     }
 } 

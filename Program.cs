@@ -1,8 +1,6 @@
 #pragma warning disable CA1416 // Windows-only API
 using System.Runtime.InteropServices;
 using NotificationBanner.Model;
-using System.Linq;
-using System.Collections.Generic;
 using System;
 using System.Threading;
 using System.IO.Pipes;
