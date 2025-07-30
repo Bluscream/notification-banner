@@ -104,9 +104,10 @@ banner.exe --message "Critical security alert!" --title "Security Alert" --impor
 | `primary` | Force primary screen | `false` | `--primary` | `"Primary": true` | `?primary=true` | `"Primary": true` |
 | `important` | Bypass Do Not Disturb | `false` | `--important` | `"Important": true` | `?important=true` | `"Important": true` |
 | `exit` | Exit after notification | `false` | `--exit` | `"Exit": true` | `?exit=true` | `"Exit": true` |
-| `api-listen-addresses` | HTTP server addresses | `"0.0.0.0:14969,[::]:14696"` | `--api-listen-addresses "addr"` | `"ApiListenAddresses": "addr"` | ❌ | ❌ |
+| `api-listen-port` | HTTP server port | `14969` | `--api-listen-port 8080` | `"ApiListenPort": 8080` | ❌ | ❌ |
 | `log-file` | Path to log file | `""` | `--log-file "path"` | `"LogFile": "path"` | ❌ | ❌ |
 | `console` | Show console window | `false` | `--console` | `"Console": true` | ❌ | ❌ |
+| `create-default-config` | Create default config files | `false` | `--create-default-config` | `"CreateDefaultConfig": true` | ❌ | ❌ |
 | `default-images` | Regex patterns for auto-images | `{"HASS\\.Agent": "..."}` | ❌ | `"DefaultImages": {...}` | ❌ | ❌ |
 
 **Position Values:** `topleft`, `topright`, `bottomleft`, `bottomright`, `topcenter`, `bottomcenter`, `center`

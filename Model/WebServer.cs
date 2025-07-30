@@ -89,7 +89,6 @@ namespace NotificationBanner.Model
                 }
                 catch (ObjectDisposedException)
                 {
-                    // Listener was disposed, exit the loop
                     break;
                 }
                 catch (Exception ex)
@@ -142,16 +141,14 @@ namespace NotificationBanner.Model
                 // Handle GET requests
                 if (method.Equals("GET", StringComparison.OrdinalIgnoreCase))
                 {
-                    var config = ParseConfigFromUrl(url, clientIp);
+                    _config.ParseUrl(url, clientIp);
                     
-                    if (string.IsNullOrWhiteSpace(config.Message))
+                    if (string.IsNullOrWhiteSpace(_config.Message))
                     {
                         await SendHttpResponse(writer, "Missing 'message' parameter", 400);
                         return;
                     }
-
-                    // Enqueue the notification
-                    _notificationQueue.Enqueue(config);
+                    _notificationQueue.Enqueue(_config);
                     
                     await SendHttpResponse(writer, "Notification queued successfully", 200);
                 }
@@ -219,74 +216,6 @@ namespace NotificationBanner.Model
             {
                 Utils.LogError(_config, "Error sending HTTP response", ex);
             }
-        }
-
-        private Config ParseConfigFromUrl(string url, string clientIp)
-        {
-            var config = new Config();
-            
-            // Parse query parameters
-            var queryIndex = url.IndexOf('?');
-            if (queryIndex >= 0)
-            {
-                var query = url.Substring(queryIndex + 1);
-                var queryParams = ParseQueryString(query);
-                
-                // Map query parameters to config properties
-                config.Message = queryParams.GetValueOrDefault("message");
-                config.Title = queryParams.GetValueOrDefault("title") ?? $"Notification from {clientIp}";
-                config.Time = queryParams.GetValueOrDefault("time") ?? "10";
-                config.Image = queryParams.GetValueOrDefault("image");
-                config.Position = queryParams.GetValueOrDefault("position")?.ToLowerInvariant() ?? "topleft";
-                config.Exit = queryParams.GetValueOrDefault("exit")?.ToLowerInvariant() == "true";
-                config.Color = queryParams.GetValueOrDefault("color");
-                config.Sound = queryParams.GetValueOrDefault("sound") ?? "C:\\Windows\\Media\\Windows Notify System Generic.wav";
-                config.Size = queryParams.GetValueOrDefault("size") ?? "100";
-                config.Primary = queryParams.GetValueOrDefault("primary")?.ToLowerInvariant() == "true";
-                config.Important = queryParams.GetValueOrDefault("important")?.ToLowerInvariant() == "true";
-
-                // Handle image based on title (same logic as in Config.Load)
-                if (string.IsNullOrEmpty(config.Image) && !string.IsNullOrEmpty(config.Title))
-                {
-                    foreach (var kvp in config.DefaultImages)
-                    {
-                        if (System.Text.RegularExpressions.Regex.IsMatch(config.Title, kvp.Key, System.Text.RegularExpressions.RegexOptions.IgnoreCase))
-                        {
-                            config.Image = kvp.Value;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return config;
-        }
-
-        private Dictionary<string, string> ParseQueryString(string query)
-        {
-            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            
-            if (string.IsNullOrWhiteSpace(query))
-                return result;
-
-            var pairs = query.Split('&', StringSplitOptions.RemoveEmptyEntries);
-            foreach (var pair in pairs)
-            {
-                var keyValue = pair.Split('=', 2);
-                if (keyValue.Length == 2)
-                {
-                    var key = Uri.UnescapeDataString(keyValue[0]);
-                    var value = Uri.UnescapeDataString(keyValue[1]);
-                    result[key] = value;
-                }
-                else if (keyValue.Length == 1)
-                {
-                    var key = Uri.UnescapeDataString(keyValue[0]);
-                    result[key] = string.Empty;
-                }
-            }
-            
-            return result;
         }
 
 

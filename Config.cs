@@ -80,14 +80,10 @@ namespace NotificationBanner {
                 config.ParseCommandLine(args);
             }
 
-            // If Image is not set by command line and Title matches a regex, set Image
             if (!imageSetByCmd && !string.IsNullOrEmpty(config.Title)) {
                 foreach (var kvp in config.DefaultImages) {
-                    // Console.WriteLine($"Checking Title {config.Title} against {kvp.Key}");
                     if (System.Text.RegularExpressions.Regex.IsMatch(config.Title, kvp.Key, System.Text.RegularExpressions.RegexOptions.IgnoreCase)) {
-                        // Console.WriteLine($"Setting Image to {kvp.Value} for Title {config.Title}");
                         config.Image = kvp.Value;
-                        // config.Title = "overridden";
                         break;
                     }
                 }
@@ -153,6 +149,64 @@ namespace NotificationBanner {
                             break;
                         case "log-file": LogFile = value; break;
                         case "console": Console = true; break;
+                    }
+                }
+            }
+        }
+
+        public void ParseUrl(string url, string clientIp = "unknown") {
+            var queryIndex = url.IndexOf('?');
+            if (queryIndex >= 0)
+            {
+                var query = url.Substring(queryIndex + 1);
+                var queryParams = Bluscream.Utils.ParseQueryString(query);
+                
+                // Map query parameters to config properties only if they are provided
+                if (queryParams.ContainsKey("message"))
+                    Message = queryParams["message"];
+                
+                if (queryParams.ContainsKey("title"))
+                    Title = queryParams["title"];
+                else
+                    Title = $"Notification from {clientIp}";
+                
+                if (queryParams.ContainsKey("time"))
+                    Time = queryParams["time"];
+                
+                if (queryParams.ContainsKey("image"))
+                    Image = queryParams["image"];
+                
+                if (queryParams.ContainsKey("position"))
+                    Position = queryParams["position"]?.ToLowerInvariant();
+                
+                if (queryParams.ContainsKey("exit"))
+                    Exit = queryParams["exit"]?.ToLowerInvariant() == "true";
+                
+                if (queryParams.ContainsKey("color"))
+                    Color = queryParams["color"];
+                
+                if (queryParams.ContainsKey("sound"))
+                    Sound = queryParams["sound"];
+                
+                if (queryParams.ContainsKey("size"))
+                    Size = queryParams["size"];
+                
+                if (queryParams.ContainsKey("primary"))
+                    Primary = queryParams["primary"]?.ToLowerInvariant() == "true";
+                
+                if (queryParams.ContainsKey("important"))
+                    Important = queryParams["important"]?.ToLowerInvariant() == "true";
+
+                // Handle image based on title (same logic as in Config.Load)
+                if (string.IsNullOrEmpty(Image) && !string.IsNullOrEmpty(Title))
+                {
+                    foreach (var kvp in this.DefaultImages)
+                    {
+                        if (System.Text.RegularExpressions.Regex.IsMatch(Title, kvp.Key, System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                        {
+                            Image = kvp.Value;
+                            break;
+                        }
                     }
                 }
             }
