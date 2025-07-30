@@ -111,6 +111,17 @@ namespace NotificationBanner {
             }
         }
 
+        public string? GetImage() {
+            if (string.IsNullOrEmpty(Image) && !string.IsNullOrEmpty(Title)) {
+                foreach (var kvp in this.DefaultImages) {
+                    if (System.Text.RegularExpressions.Regex.IsMatch(Title, kvp.Key, System.Text.RegularExpressions.RegexOptions.IgnoreCase)) {
+                        return kvp.Value;
+                    }
+                }
+            }
+            return Image;
+        }
+
         public void ParseUrl(string url, string clientIp = "unknown") {
             var queryIndex = url.IndexOf('?');
             if (queryIndex >= 0)
@@ -161,17 +172,9 @@ namespace NotificationBanner {
                     if (int.TryParse(queryParams["max-notifications"], out int maxNotifications))
                         MaxNotificationsOnScreen = maxNotifications;
 
-                // Handle image based on title (same logic as in Config.Load)
-                if (string.IsNullOrEmpty(Image) && !string.IsNullOrEmpty(Title))
-                {
-                    foreach (var kvp in this.DefaultImages)
-                    {
-                        if (System.Text.RegularExpressions.Regex.IsMatch(Title, kvp.Key, System.Text.RegularExpressions.RegexOptions.IgnoreCase))
-                        {
-                            Image = kvp.Value;
-                            break;
-                        }
-                    }
+                var image_ = GetImage();
+                if (!string.IsNullOrEmpty(image_)) {
+                    Image = image_;
                 }
             }
         }
@@ -249,12 +252,7 @@ namespace NotificationBanner {
             }
 
             if (!imageSetByCmd && !string.IsNullOrEmpty(config.Title)) {
-                foreach (var kvp in config.DefaultImages) {
-                    if (System.Text.RegularExpressions.Regex.IsMatch(config.Title, kvp.Key, System.Text.RegularExpressions.RegexOptions.IgnoreCase)) {
-                        config.Image = kvp.Value;
-                        break;
-                    }
-                }
+                config.Image = config.GetImage();
             }
 
             if (config.CreateDefaultConfig) {
