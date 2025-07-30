@@ -6,7 +6,17 @@ public static partial class Utils
 {
     public static void Log(Config config, string message, params object[] args)
     {
-        var formattedMessage = string.Format(message, args);
+        string formattedMessage;
+        try
+        {
+            formattedMessage = string.Format(message, args);
+        }
+        catch (FormatException)
+        {
+            // If string.Format fails, just use the message as-is
+            formattedMessage = message;
+        }
+        
         var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         var logMessage = $"[{timestamp}] {formattedMessage}";
         
