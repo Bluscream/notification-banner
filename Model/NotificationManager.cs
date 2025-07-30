@@ -85,7 +85,7 @@ namespace NotificationBanner.Model {
         private void PositionNewBanner(BannerForm newBanner) {
             if (_activeBanners.Count == 0) return;
             
-            var bannerHeight = _activeBanners[0].Height;
+            var bannerHeight = _activeBanners[0]?.Height ?? 100;
             var spacing = 10; // Space between banners
             var totalOffset = 0;
             
@@ -99,13 +99,13 @@ namespace NotificationBanner.Model {
             
             Utils.Log(null, $"[NotificationManager] PositionNewBanner: Title='{newBanner?.Text}', Offset={totalOffset}");
             // Position only the new banner
-            newBanner.UpdateOffset(totalOffset);
+            newBanner?.UpdateOffset(totalOffset);
         }
 
         private void RepositionBanners() {
             if (_activeBanners.Count == 0) return;
             
-            var bannerHeight = _activeBanners[0].Height;
+            var bannerHeight = _activeBanners[0]?.Height ?? 100;
             var spacing = 10; // Space between banners
             var totalOffset = 0;
             

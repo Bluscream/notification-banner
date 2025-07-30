@@ -29,7 +29,11 @@ public static partial class Utils
         {
             try
             {
-                File.AppendAllText(config.LogFile, logMessage + Environment.NewLine);
+                var logFile = config?.LogFile ?? "banner.log";
+                if (!string.IsNullOrWhiteSpace(logFile))
+                {
+                    File.AppendAllText(logFile, logMessage + Environment.NewLine);
+                }
             }
             catch (Exception ex)
             {

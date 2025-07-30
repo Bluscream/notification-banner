@@ -7,7 +7,6 @@ namespace NotificationBanner.Model {
     internal class MyApplicationContext : System.Windows.Forms.ApplicationContext {
         private readonly NotificationQueue _notificationQueue;
         private NotificationManager? _notificationManager;
-        private Config? _currentConfig;
         private WebServer? _webServer;
         internal MyApplicationContext(NotificationQueue notificationQueue, Config config) {
             _notificationQueue = notificationQueue;

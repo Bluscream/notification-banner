@@ -188,11 +188,11 @@ namespace NotificationBanner {
             config.GlobalConfigPath = Environment.SpecialFolder.CommonApplicationData.CombineFile(exePath.FileNameWithoutExtension() + ".json");
             config.ProgramConfigPath = exePath.ReplaceExtension("json");
             config.UserConfigPath = Environment.SpecialFolder.UserProfile.CombineFile(exePath.FileNameWithoutExtension() + ".json");
-            if (config.GlobalConfigPath?.Exists ?? false) {
+            if (config.GlobalConfigPath?.Exists == true) {
                 config.LoadFromFile(config.GlobalConfigPath.FullName);
-            } else if (config.ProgramConfigPath?.Exists ?? false) {
+            } else if (config.ProgramConfigPath?.Exists == true) {
                 config.LoadFromFile(config.ProgramConfigPath.FullName);
-            } else if (config.UserConfigPath?.Exists ?? false) {
+            } else if (config.UserConfigPath?.Exists == true) {
                 config.LoadFromFile(config.UserConfigPath.FullName);
             }
 
@@ -227,9 +227,9 @@ namespace NotificationBanner {
             }
 
             if (config.CreateDefaultConfig) {
-                if (!config.GlobalConfigPath?.Exists ?? false) config.SaveToFile(config.GlobalConfigPath.FullName);
-                if (!config.ProgramConfigPath?.Exists ?? false) config.SaveToFile(config.ProgramConfigPath.FullName);
-                if (!config.UserConfigPath?.Exists ?? false) config.SaveToFile(config.UserConfigPath.FullName);
+                if (config.GlobalConfigPath?.Exists != true) config.SaveToFile(config.GlobalConfigPath?.FullName ?? "");
+                if (config.ProgramConfigPath?.Exists != true) config.SaveToFile(config.ProgramConfigPath?.FullName ?? "");
+                if (config.UserConfigPath?.Exists != true) config.SaveToFile(config.UserConfigPath?.FullName ?? "");
             }
             return config;
         }

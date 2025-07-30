@@ -28,7 +28,7 @@ if %ERRORLEVEL% neq 0 (
 )
 
 REM Build notification-banner.sln in Release mode
-dotnet publish "P:\Visual Studio\source\repos\notification-banner\notification-banner.sln" -c Release
+dotnet publish "P:\Visual Studio\source\repos\notification-banner\notification-banner.sln" -c Release --verbosity normal
 
 if %ERRORLEVEL% neq 0 (
     echo NotificationBanner build failed!

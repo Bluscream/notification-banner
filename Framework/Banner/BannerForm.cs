@@ -40,7 +40,7 @@ namespace NotificationBanner.Banner {
         private int _currentOffset;
         private int _hide = 100;
         public Guid Id { get; } = Guid.NewGuid();
-        public bool IsDisposed { get; private set; }
+        public new bool IsDisposed { get; private set; }
         private Label lblTop;
         private Label lblTitle;
         private PictureBox pbxLogo;
