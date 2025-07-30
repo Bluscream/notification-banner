@@ -117,7 +117,7 @@ namespace NotificationBanner.Model
             {
                 using var stream = client.GetStream();
                 using var reader = new StreamReader(stream, Encoding.UTF8);
-                using var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
+                using var writer = new StreamWriter(stream, new UTF8Encoding(false)) { AutoFlush = true };
 
                 // Get client IP address
                 var clientEndPoint = client.Client.RemoteEndPoint as IPEndPoint;
@@ -172,40 +172,65 @@ namespace NotificationBanner.Model
                     await SendHttpResponse(writer, "Method not allowed", 405);
                 }
             }
+            catch (IOException ex) when (ex.Message.Contains("aborted") || ex.Message.Contains("closed"))
+            {
+                // Client disconnected before we could send response - this is normal
+                Utils.Log(_config, $"[WebServer] Client disconnected before response could be sent: {ex.Message}");
+            }
             catch (Exception ex)
             {
                 Utils.LogError(_config, "Error handling client", ex);
             }
             finally
             {
-                client.Close();
+                try
+                {
+                    client.Close();
+                }
+                catch (Exception ex)
+                {
+                    Utils.Log(_config, $"[WebServer] Error closing client connection: {ex.Message}");
+                }
             }
         }
 
         private async Task SendHttpResponse(StreamWriter writer, string message, int statusCode)
         {
-            var statusText = statusCode switch
+            try
             {
-                200 => "OK",
-                400 => "Bad Request",
-                405 => "Method Not Allowed",
-                _ => "Internal Server Error"
-            };
+                var statusText = statusCode switch
+                {
+                    200 => "OK",
+                    400 => "Bad Request",
+                    405 => "Method Not Allowed",
+                    _ => "Internal Server Error"
+                };
 
-            var responseData = new { status = statusText, message = message };
-            var jsonResponse = System.Text.Json.JsonSerializer.Serialize(responseData);
-            var contentLength = Encoding.UTF8.GetByteCount(jsonResponse);
+                var responseData = new { status = statusText, message = message };
+                var jsonResponse = System.Text.Json.JsonSerializer.Serialize(responseData);
+                var contentLength = Encoding.UTF8.GetByteCount(jsonResponse);
 
-            await writer.WriteLineAsync($"HTTP/1.1 {statusCode} {statusText}");
-            await writer.WriteLineAsync("Content-Type: application/json");
-            await writer.WriteLineAsync($"Content-Length: {contentLength}");
-            await writer.WriteLineAsync("Access-Control-Allow-Origin: *");
-            await writer.WriteLineAsync("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS");
-            await writer.WriteLineAsync("Access-Control-Allow-Headers: Content-Type");
-            await writer.WriteLineAsync("Connection: close");
-            await writer.WriteLineAsync();
-            await writer.WriteAsync(jsonResponse);
-            await writer.FlushAsync();
+                // Write HTTP response headers
+                await writer.WriteAsync($"HTTP/1.1 {statusCode} {statusText}\r\n");
+                await writer.WriteAsync("Content-Type: application/json; charset=utf-8\r\n");
+                await writer.WriteAsync($"Content-Length: {contentLength}\r\n");
+                await writer.WriteAsync("Access-Control-Allow-Origin: *\r\n");
+                await writer.WriteAsync("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS\r\n");
+                await writer.WriteAsync("Access-Control-Allow-Headers: Content-Type\r\n");
+                await writer.WriteAsync("Connection: close\r\n");
+                await writer.WriteAsync("\r\n");
+                await writer.WriteAsync(jsonResponse);
+                await writer.FlushAsync();
+            }
+            catch (IOException ex) when (ex.Message.Contains("aborted") || ex.Message.Contains("closed"))
+            {
+                // Client disconnected - this is normal behavior
+                Utils.Log(_config, $"[WebServer] Client disconnected during response: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Utils.LogError(_config, "Error sending HTTP response", ex);
+            }
         }
 
         private Config ParseConfigFromUrl(string url, string clientIp)
