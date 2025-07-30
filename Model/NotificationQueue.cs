@@ -8,33 +8,42 @@ namespace NotificationBanner.Model {
         private int _skipped = 0;
         private const int MaxQueueLength = 100;
         private readonly object _lock = new();
+        private Config? _config; // For logging purposes
 
         public void Enqueue(Config config) {
             lock (_lock) {
                 if (_queue.Count >= MaxQueueLength) {
                     _skipped++;
-                    Console.WriteLine($"[Queue] Skipped notification: {config?.Title} - {config?.Message} (skipped count: {_skipped})");
+                    if (_config != null) {
+                        Utils.Log(_config, $"[Queue] Skipped notification: {config?.Title} - {config?.Message} (skipped count: {_skipped})");
+                    }
                     return;
                 }
                 _queue.Enqueue(config);
-                // Console.WriteLine($"[Queue] Enqueued notification: {config?.Title} - {config?.Message}");
+                if (_config != null) {
+                    Utils.Log(_config, $"[Queue] Enqueued notification: {config?.Title} - {config?.Message}");
+                }
             }
         }
 
         public bool TryDequeue(out Config? config) {
             lock (_lock) {
                 var result = _queue.TryDequeue(out config);
-                if (result && config != null)
-                    // Console.WriteLine($"[Queue] Dequeued notification: {config?.Title} - {config?.Message}");
+                if (result && config != null && _config != null) {
+                    Utils.Log(_config, $"[Queue] Dequeued notification: {config?.Title} - {config?.Message}");
+                }
                 if (_queue.IsEmpty && _skipped > 0) {
                     // Add a notification about skipped items
                     var skippedMsg = $"{_skipped} notifications were skipped.";
-                    _queue.Enqueue(new Config {
+                    var skippedConfig = new Config {
                         Message = skippedMsg,
                         Title = "Notification Queue",
                         Time = "5"
-                    });
-                    Console.WriteLine($"[Queue] Enqueued skipped notification: {skippedMsg}");
+                    };
+                    _queue.Enqueue(skippedConfig);
+                    if (_config != null) {
+                        Utils.Log(_config, $"[Queue] Enqueued skipped notification: {skippedMsg}");
+                    }
                     _skipped = 0;
                 }
                 return result;
@@ -42,5 +51,9 @@ namespace NotificationBanner.Model {
         }
 
         public bool IsEmpty => _queue.IsEmpty;
+
+        public void SetConfigForLogging(Config config) {
+            _config = config;
+        }
     }
 } 

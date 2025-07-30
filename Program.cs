@@ -47,6 +47,9 @@ namespace NotificationBanner {
                 Bluscream.Utils.CreateConsole();
                 Bluscream.Utils.SetConsoleTitle("Notification Banner");
                 Utils.Log(config, $"{System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName} {string.Join(" ", args)}");
+                Utils.Log(config, $"[Config] Global: {config.GlobalConfigPath.Quote()}");
+                Utils.Log(config, $"[Config] Program: {config.ProgramConfigPath.Quote()}");
+                Utils.Log(config, $"[Config] User: {config.UserConfigPath.Quote()}");
             }
             var notificationQueue = new NotificationQueue();
             if (!string.IsNullOrWhiteSpace(config.Message)) {

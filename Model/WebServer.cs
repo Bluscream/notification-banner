@@ -39,8 +39,18 @@ namespace NotificationBanner.Model
 
             foreach (var address in addresses)
             {
+                var ip = "0.0.0.0";
+                var port = 14969;
                 try
                 {
+                    if (address.Contains(":"))
+                    {
+                        var parts = address.Split(":");
+                        ip = parts[0];
+                        port = int.Parse(parts[1]);
+                    } else {
+                        ip = address;
+                    }
                     // Handle IPv6 addresses properly
                     string formattedAddress = address;
                     if (address.StartsWith("[") && address.Contains("]:"))
@@ -68,12 +78,13 @@ namespace NotificationBanner.Model
                 }
                 catch (Exception ex)
                 {
-                    var errorMessage = ex.Message;
-                    if (errorMessage.Contains("The request is not supported"))
-                    {
-                        errorMessage = "Invalid URL format or unsupported address. Try using 127.0.0.1:port or localhost:port";
+                    if (ex.Message.Contains("The request is not supported")) {
+                        Utils.LogError(_config, $"Invalid URL format or unsupported address. Try using 127.0.0.1:port or localhost:port"); continue;
+                    } else if (ex.Message == "Access is denied.") {
+                        Utils.LogError(_config, $"Binding to {address} failed. Try running as administrator."); continue;
+                    } else {
+                        Utils.LogError(_config, $"Failed to start listener on {address}: {ex.Message}", ex); continue;
                     }
-                    Utils.LogError(_config, $"Failed to start listener on {address}: {errorMessage}", ex);
                 }
             }
 

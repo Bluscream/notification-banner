@@ -12,6 +12,7 @@ namespace NotificationBanner.Model {
         private WebServer? _webServer;
         internal MyApplicationContext(NotificationQueue notificationQueue, Config config) {
             _notificationQueue = notificationQueue;
+            _notificationQueue.SetConfigForLogging(config);
             StartQueueProcessing();
             StartWebServer(config);
         }

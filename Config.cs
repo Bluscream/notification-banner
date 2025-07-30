@@ -33,26 +33,30 @@ namespace NotificationBanner {
         public string? ApiListenAddresses { get; set; } = "*:14969";
         public string? LogFile { get; set; } = Path.Combine(Path.GetTempPath(), "banner.log");
         public bool Console { get; set; } = false;
+        public bool CreateDefaultConfig { get; set; } = false;
         public Dictionary<string, string> DefaultImages { get; set; } = new Dictionary<string, string> {
             { @"HASS\.Agent", "https://www.hass-agent.io/2.1/assets/images/logo/logo-256.png" }
         };
+        [JsonIgnore]
+        internal FileInfo? UserConfigPath { get; set; }
+        [JsonIgnore]
+        internal FileInfo? GlobalConfigPath { get; set; }
+        [JsonIgnore]
+        internal FileInfo? ProgramConfigPath { get; set; }
 
         public static Config Load(string[] args) {
             var exePath = Bluscream.Utils.GetOwnPath();
-            var programConfigPath = exePath.ReplaceExtension("json");
-            var userConfigPath = Environment.SpecialFolder.UserProfile.Combine(exePath.FileNameWithoutExtension + ".json");
 
             var config = new Config();
-            if (!programConfigPath.Exists) {
-                // config.SaveToFile(programConfigPath.FullName);
-            } else {
-                config.LoadFromFile(programConfigPath.FullName);
-            }
-
-            if (!userConfigPath.Exists) {
-                // config.SaveToFile(userConfigPath.FullName);
-            } else {
-                config.LoadFromFile(userConfigPath.FullName);
+            config.GlobalConfigPath = Environment.SpecialFolder.CommonApplicationData.CombineFile(exePath.FileNameWithoutExtension() + ".json");
+            config.ProgramConfigPath = exePath.ReplaceExtension("json");
+            config.UserConfigPath = Environment.SpecialFolder.UserProfile.CombineFile(exePath.FileNameWithoutExtension() + ".json");
+            if (config.GlobalConfigPath?.Exists ?? false) {
+                config.LoadFromFile(config.GlobalConfigPath.FullName);
+            } else if (config.ProgramConfigPath?.Exists ?? false) {
+                config.LoadFromFile(config.ProgramConfigPath.FullName);
+            } else if (config.UserConfigPath?.Exists ?? false) {
+                config.LoadFromFile(config.UserConfigPath.FullName);
             }
 
             bool imageSetByCmd = false;
@@ -87,6 +91,12 @@ namespace NotificationBanner {
                         break;
                     }
                 }
+            }
+
+            if (config.CreateDefaultConfig) {
+                if (!config.GlobalConfigPath?.Exists ?? false) config.SaveToFile(config.GlobalConfigPath.FullName);
+                if (!config.ProgramConfigPath?.Exists ?? false) config.SaveToFile(config.ProgramConfigPath.FullName);
+                if (!config.UserConfigPath?.Exists ?? false) config.SaveToFile(config.UserConfigPath.FullName);
             }
             return config;
         }
