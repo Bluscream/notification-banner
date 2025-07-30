@@ -82,6 +82,12 @@ namespace NotificationBanner.Model {
                 screen = System.Windows.Forms.Screen.PrimaryScreen;
             }
             
+            // Ensure we have a valid screen with bounds
+            if (screen?.Bounds == null) {
+                // Ultimate fallback - use default values
+                return (50, 60 + offset);
+            }
+            
             int x = 0, y = 0;
             switch (pos) {
                 case BannerPositionEnum.TopLeft:

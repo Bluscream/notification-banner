@@ -32,7 +32,7 @@ namespace NotificationBanner.Banner {
         private const float BaseFontSizeTop = 12.5f;
         private const float BaseFontSizeTitle = 11.25f;
         private const double DefaultOpacity = 0.9;
-        private static readonly Color DefaultBackColor = Color.FromArgb(45, 45, 45);
+        private static readonly new Color DefaultBackColor = Color.FromArgb(45, 45, 45);
 
         private Timer? _timerHide;
         private bool _hiding;
