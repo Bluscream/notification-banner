@@ -24,49 +24,28 @@ namespace NotificationBanner.Model
             _config = config;
         }
 
-        public void Start(string apiListenAddresses)
+        public void Start(int apiListenPort)
         {
-            if (string.IsNullOrWhiteSpace(apiListenAddresses))
+            if (apiListenPort <= 0 || apiListenPort > 65535) {
+                Utils.LogError(_config, $"[WebServer] Invalid listen port: {apiListenPort}");
                 return;
+            }
 
-            var addresses = apiListenAddresses.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(a => a.Trim())
-                .Where(a => !string.IsNullOrWhiteSpace(a))
-                .ToList();
-
+            // Get all network interface IPs
+            var addresses = GetNetworkInterfaceAddresses();
+            
             if (!addresses.Any())
-                return;
-
-            foreach (var address in addresses)
             {
-                var ip = "0.0.0.0";
-                var port = 14969;
+                Utils.LogError(_config, "No network interfaces found to bind to");
+                return;
+            }
+
+            foreach (var ipAddress in addresses)
+            {
                 try
                 {
-                    if (address.Contains(":"))
-                    {
-                        var parts = address.Split(":");
-                        ip = parts[0];
-                        port = int.Parse(parts[1]);
-                    } else {
-                        ip = address;
-                    }
-                    // Handle IPv6 addresses properly
-                    string formattedAddress = address;
-                    if (address.StartsWith("[") && address.Contains("]:"))
-                    {
-                        // IPv6 address like [::]:port
-                        var parts = address.Split("]:", 2);
-                        if (parts.Length == 2)
-                        {
-                            var ipv6Part = parts[0].TrimStart('[');
-                            var portPart = parts[1];
-                            formattedAddress = $"[{ipv6Part}]:{portPart}";
-                        }
-                    }
-                    
                     var listener = new HttpListener();
-                    var url = $"http://{formattedAddress}/";
+                    var url = $"http://{ipAddress}:{apiListenPort}/";
                     listener.Prefixes.Add(url);
                     listener.Start();
                     _listeners.Add(listener);
@@ -78,12 +57,13 @@ namespace NotificationBanner.Model
                 }
                 catch (Exception ex)
                 {
-                    if (ex.Message.Contains("The request is not supported")) {
-                        Utils.LogError(_config, $"Invalid URL format or unsupported address. Try using 127.0.0.1:port or localhost:port"); continue;
-                    } else if (ex.Message == "Access is denied.") {
-                        Utils.LogError(_config, $"Binding to {address} failed. Try running as administrator."); continue;
+                    var errorMessage = ex.Message;
+                    if (errorMessage.Contains("The request is not supported")) {
+                        Utils.LogError(_config, $"Invalid URL format or unsupported address: {ipAddress}");
+                    } else if (errorMessage.Contains("Access is denied")) {
+                        Utils.LogError(_config, $"Access denied binding to {ipAddress}:{apiListenPort}. Skipping this interface.");
                     } else {
-                        Utils.LogError(_config, $"Failed to start listener on {address}: {ex.Message}", ex); continue;
+                        Utils.LogError(_config, $"Failed to start listener on {ipAddress}:{apiListenPort}: {errorMessage}", ex);
                     }
                 }
             }
@@ -270,6 +250,55 @@ namespace NotificationBanner.Model
             var buffer = Encoding.UTF8.GetBytes(json);
             response.ContentLength64 = buffer.Length;
             await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+        }
+
+        private List<string> GetNetworkInterfaceAddresses()
+        {
+            var addresses = new List<string>();
+            
+            try
+            {
+                // Always include localhost
+                addresses.Add("127.0.0.1");
+                addresses.Add("localhost");
+                
+                // Get all network interfaces
+                var networkInterfaces = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
+                
+                foreach (var networkInterface in networkInterfaces)
+                {
+                    // Only include interfaces that are up and not loopback
+                    if (networkInterface.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up &&
+                        networkInterface.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
+                    {
+                        var ipProperties = networkInterface.GetIPProperties();
+                        
+                        foreach (var ipAddress in ipProperties.UnicastAddresses)
+                        {
+                            // Only include IPv4 addresses
+                            if (ipAddress.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                            {
+                                var ip = ipAddress.Address.ToString();
+                                if (!addresses.Contains(ip))
+                                {
+                                    addresses.Add(ip);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                Utils.Log(_config, $"[WebServer] Found {addresses.Count} network interfaces to bind to");
+            }
+            catch (Exception ex)
+            {
+                Utils.LogError(_config, "Error getting network interfaces", ex);
+                // Fallback to localhost only
+                addresses.Clear();
+                addresses.Add("127.0.0.1");
+            }
+            
+            return addresses;
         }
     }
 } 

@@ -30,7 +30,7 @@ namespace NotificationBanner {
         public string? Size { get; set; } = "100";
         public bool Primary { get; set; } = false;
         public bool Important { get; set; } = false;
-        public string? ApiListenAddresses { get; set; } = "*:14969";
+        public int ApiListenPort { get; set; } = 14969;
         public string? LogFile { get; set; } = Path.Combine(Path.GetTempPath(), "banner.log");
         public bool Console { get; set; } = false;
         public bool CreateDefaultConfig { get; set; } = false;
@@ -148,7 +148,9 @@ namespace NotificationBanner {
                         case "size": Size = value; break;
                         case "primary": Primary = true; break;
                         case "important": Important = true; break;
-                        case "api-listen-addresses": ApiListenAddresses = value; break;
+                        case "api-listen-port": 
+                            if (int.TryParse(value, out int port)) ApiListenPort = port; 
+                            break;
                         case "log-file": LogFile = value; break;
                         case "console": Console = true; break;
                     }

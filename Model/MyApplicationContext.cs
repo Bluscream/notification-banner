@@ -132,10 +132,10 @@ namespace NotificationBanner.Model {
 
         private void StartWebServer(Config config)
         {
-            if (!string.IsNullOrWhiteSpace(config.ApiListenAddresses))
+            if (config.ApiListenPort > 0)
             {
                 _webServer = new WebServer(_notificationQueue, config);
-                _webServer.Start(config.ApiListenAddresses);
+                _webServer.Start(config.ApiListenPort);
             }
         }
 
