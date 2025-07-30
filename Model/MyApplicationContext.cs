@@ -9,9 +9,11 @@ namespace NotificationBanner.Model {
         private BannerForm? _bannerForm;
         private System.Windows.Forms.Timer? _queueTimer;
         private Config? _currentConfig;
-        internal MyApplicationContext(NotificationQueue notificationQueue) {
+        private WebServer? _webServer;
+        internal MyApplicationContext(NotificationQueue notificationQueue, Config config) {
             _notificationQueue = notificationQueue;
             StartQueueProcessing();
+            StartWebServer(config);
         }
 
         private void StartQueueProcessing() {
@@ -35,7 +37,7 @@ namespace NotificationBanner.Model {
                 }
                 
                 var toastData = CreateBannerData(config);
-                Console.WriteLine($"[AppContext] Showing notification: {toastData?.Config?.Title} - {toastData?.Config?.Message}");
+                Bluscream.Logging.LogInfo($"Showing notification: {toastData?.Config?.Title} - {toastData?.Config?.Message}", "AppContext");
                 if (_bannerForm == null || _bannerForm.IsDisposed) {
                     _bannerForm = new BannerForm();
                     _bannerForm.Disposed += (s, e) => {
@@ -125,6 +127,25 @@ namespace NotificationBanner.Model {
         private BannerData.PositionDelegate ParsePosition(string posArg, bool usePrimaryScreen = false) {
             var posEnum = ParsePositionEnum(posArg);
             return (formWidth, formHeight, offset) => GetScreenPosition(posEnum, formWidth, formHeight, offset, usePrimaryScreen);
+        }
+
+        private void StartWebServer(Config config)
+        {
+            if (!string.IsNullOrWhiteSpace(config.ApiListenAddresses))
+            {
+                _webServer = new WebServer(_notificationQueue);
+                _webServer.Start(config.ApiListenAddresses);
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _webServer?.Stop();
+                _webServer = null;
+            }
+            base.Dispose(disposing);
         }
     }
 }

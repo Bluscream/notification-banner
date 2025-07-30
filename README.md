@@ -56,6 +56,9 @@ You can use any of the following prefixes for each argument: `--`, `-`, or `/` (
 - `--primary`: Force banner to always appear on the primary screen (default: uses screen with cursor)
 - `--important`: Mark notification as important (bypasses Do Not Disturb mode)
 - `--exit`: Exit the application after showing the notification
+- `--api-listen-addresses`: Comma-separated list of addresses to listen on for HTTP requests (e.g., "localhost:31415,0.0.0.0:8080")
+- `--log-file`: Path to log file (default: no file logging)
+- `--console`: Show console window and enable console output (default: hidden)
 
 ## Do Not Disturb Mode
 
@@ -130,6 +133,9 @@ User-level configuration overrides program-level settings. Command line argument
   "Size": "100",
   "Primary": false,
   "Important": false,
+  "ApiListenAddresses": "0.0.0.0:14969,[::]:14696",
+  "LogFile": "C:\\Logs\\banner.log",
+  "Console": false,
   "DefaultImages": {
     "HASS\\.Agent": "https://www.hass-agent.io/2.1/assets/images/logo/logo-256.png"
   }
@@ -172,6 +178,105 @@ banner.exe --message "Regular update" --title "System Update"
 
 # Important notification (bypasses Do Not Disturb)
 banner.exe --message "Critical security alert!" --title "Security Alert" --important
+```
+
+## Inter-Process Communication (IPC)
+
+The application supports two types of IPC mechanisms for sending notifications to an already running instance.
+
+### Named Pipe IPC
+
+**C# Example:**
+```csharp
+using System.IO.Pipes;
+using System.Text.Json;
+
+// Create notification config
+var config = new {
+    Message = "Hello from C#!",
+    Title = "C# IPC Test",
+    Time = "10",
+    Position = "bottomright"
+};
+
+// Send via named pipe
+using var client = new NamedPipeClientStream(".", "notification-banner-pipe", PipeDirection.Out);
+client.Connect(2000);
+using var writer = new StreamWriter(client) { AutoFlush = true };
+writer.WriteLine(System.Diagnostics.Process.GetCurrentProcess().Id);
+writer.Write(JsonSerializer.Serialize(config));
+```
+
+### HTTP API
+
+The application can also run as an HTTP server, allowing remote applications to send notifications via HTTP requests.
+
+**Start the HTTP server:**
+```bash
+# Start the application with HTTP server enabled
+banner.exe --api-listen-addresses "localhost:31415,0.0.0.0:8080"
+```
+
+**Send notifications via HTTP requests:**
+```bash
+# Notification with all parameters
+curl "http://localhost:31415/?message=Custom%20notification&title=My%20Title&time=15&position=bottomright&color=%23FF0000&size=120&important=true"
+
+# Using PowerShell
+Invoke-WebRequest -Uri "http://localhost:31415/?message=PowerShell%20test&title=PS%20Test" -Method GET
+
+# Using Python
+import requests
+response = requests.get("http://localhost:31415/", params={
+    "message": "Python notification",
+    "title": "Python Test",
+    "time": "10",
+    "position": "topleft"
+})
+```
+
+**Supported HTTP Methods:**
+- `GET` - Send notification via query parameters
+- `POST` - Send notification via query parameters
+
+**Available Query Parameters:**
+- `message` (required) - The notification message
+- `title` - The notification title (default: "Notification")
+- `time` - Display time in seconds (default: "10")
+- `position` - Position on screen (default: "topleft")
+- `image` - Image URL or path
+- `color` - Background color in hex format
+- `size` - Size scaling factor (default: "100")
+- `sound` - Sound file path or URL
+- `primary` - Force primary screen (true/false)
+- `important` - Bypass Do Not Disturb (true/false)
+- `exit` - Exit after notification (true/false)
+
+**Response Format:**
+```json
+{
+  "success": true,
+  "message": "Notification queued successfully",
+  "timestamp": "2025-07-30T04:37:08.0883393Z"
+}
+```
+
+## Logging
+
+The application includes a comprehensive logging system with configurable output destinations.
+
+### Logging Configuration
+
+**Console output enabled:**
+```bash
+banner.exe --console
+# Console visible with logging output
+```
+
+**File logging:**
+```bash
+banner.exe --api-listen-addresses "localhost:31415" --log-file "app.log"
+# Logs to file only (console hidden)
 ```
 
 ## Building

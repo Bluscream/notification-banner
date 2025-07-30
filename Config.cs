@@ -20,6 +20,9 @@ namespace NotificationBanner {
         public string? Size { get; set; } = "100";
         public bool Primary { get; set; } = false;
         public bool Important { get; set; } = false;
+        public string? ApiListenAddresses { get; set; } = "0.0.0.0:14969,[::]:14696";
+        public string? LogFile { get; set; } = Path.Combine(Path.GetTempPath(), "banner.log");
+        public bool Console { get; set; } = false;
         public Dictionary<string, string> DefaultImages { get; set; } = new Dictionary<string, string> {
             { @"HASS\.Agent", "https://www.hass-agent.io/2.1/assets/images/logo/logo-256.png" }
         };
@@ -124,6 +127,9 @@ namespace NotificationBanner {
                         case "size": Size = value; break;
                         case "primary": Primary = true; break;
                         case "important": Important = true; break;
+                        case "api-listen-addresses": ApiListenAddresses = value; break;
+                        case "log-file": LogFile = value; break;
+                        case "console": Console = true; break;
                     }
                 }
             }

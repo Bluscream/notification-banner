@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Media;
 using Timer = System.Windows.Forms.Timer;
-using SoundSwitch.UI.Menu.Util;
 using NotificationBanner.Banner;
 using System.IO;
 using Bluscream;
