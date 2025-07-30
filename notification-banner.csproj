@@ -25,4 +25,12 @@
   <ItemGroup>
     <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Blucream.Common\Blucream.Common.csproj">
+      <SetConfiguration>Configuration=Debug</SetConfiguration>
+      <SetPlatform>Platform=AnyCPU</SetPlatform>
+      <GlobalPropertiesToRemove>$(GlobalPropertiesToRemove)</GlobalPropertiesToRemove>
+      <AdditionalProperties>USE_WINDOWS=true;USE_SYSTEMDRAWING=true;USE_SYSTEMMANAGEMENT=true;USE_SYSTEMWINDOWSFORMS=true</AdditionalProperties>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

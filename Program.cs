@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System;
 using System.Threading;
 using System.IO.Pipes;
-using NotificationBanner.Util;
+using Bluscream;
 
 namespace NotificationBanner {
     internal static class Program {
@@ -41,7 +41,7 @@ namespace NotificationBanner {
                 return 0;
             }
 #if !DEBUG
-            Utils.HideConsoleWindow();
+            Bluscream.Utils.HideConsoleWindow();
 #endif
             var notificationQueue = new NotificationQueue();
 

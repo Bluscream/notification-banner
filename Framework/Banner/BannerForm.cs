@@ -11,6 +11,7 @@ using Timer = System.Windows.Forms.Timer;
 using SoundSwitch.UI.Menu.Util;
 using NotificationBanner.Banner;
 using System.IO;
+using Bluscream;
 
 namespace NotificationBanner.Banner {
     /// <summary>
@@ -141,7 +142,7 @@ namespace NotificationBanner.Banner {
                 var scaleFactor = sizeValue / 100.0;
                 ApplySizeScaling(scaleFactor);
             }
-            pbxLogo.Image = data.Image ?? Utils.CreateDefaultIcon();
+            pbxLogo.Image = data.Image ?? Bluscream.Utils.CreateDefaultIcon();
             ApplyBackgroundColorAndOpacity(data.Config.Color);
             _hiding = false;
             lblTop.Text = data.Config.Title ?? string.Empty;
@@ -161,7 +162,7 @@ namespace NotificationBanner.Banner {
         /// Parse color and opacity from a string and apply to the form.
         /// </summary>
         private void ApplyBackgroundColorAndOpacity(string? colorString) {
-            var (color, opacity) = Utils.ParseColorAndOpacity(colorString, DefaultBackColor, DefaultOpacity);
+            var (color, opacity) = Bluscream.Utils.ParseColorAndOpacity(colorString, DefaultBackColor, DefaultOpacity);
             BackColor = color;
             Opacity = opacity;
         }

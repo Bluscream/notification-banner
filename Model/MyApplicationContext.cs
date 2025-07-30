@@ -1,7 +1,7 @@
-﻿using NotificationBanner.Util;
-using NotificationBanner.Banner;
+﻿using NotificationBanner.Banner;
 using System.Drawing;
 using NotificationBanner;
+using Bluscream;
 
 namespace NotificationBanner.Model {
     internal class MyApplicationContext : System.Windows.Forms.ApplicationContext {
@@ -28,7 +28,7 @@ namespace NotificationBanner.Model {
                 _currentConfig = config;
                 
                 // Check if Do Not Disturb is active and notification is not marked as important
-                if (Utils.IsDoNotDisturbActive() && !config.Important) {
+                if (Bluscream.Utils.IsDoNotDisturbActive() && !config.Important) {
                     Console.WriteLine($"[AppContext] Skipping notification due to Do Not Disturb mode: {config.Title} - {config.Message}");
                     ProcessQueue(); // Process next notification immediately
                     return;
@@ -41,7 +41,7 @@ namespace NotificationBanner.Model {
                     _bannerForm.Disposed += (s, e) => {
                         _bannerForm = null;
                         if (_currentConfig != null && _currentConfig.Exit) {
-                            Utils.TryExitApplication();
+                            Bluscream.Utils.Exit(0);
                         } else {
                             ProcessQueue(); // Immediately process the next notification
                         }
@@ -59,8 +59,8 @@ namespace NotificationBanner.Model {
 
             var toastData = new BannerData();
             toastData.Config = config;
-            var parsedImage = imageArg?.ParseImage();
-            if (parsedImage != null) toastData.Image = parsedImage.Resize(new Size() { Width = maxImageSize, Height = maxImageSize });
+            var parsedImage = imageArg != null ? Bluscream.Extensions.ParseImage(imageArg) : null;
+            if (parsedImage != null) toastData.Image = Bluscream.Extensions.Resize(parsedImage, new Size() { Width = maxImageSize, Height = maxImageSize });
             toastData.Position = ParsePosition(posArg, config.Primary);
             return toastData;
         }

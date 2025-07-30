@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using System.Text.Encodings.Web;
 using System.Collections.Generic; // Added for Dictionary
 using System.Text.RegularExpressions; // Added for Regex
+using Bluscream;
 
 namespace NotificationBanner {
     public partial class Config {
@@ -24,7 +25,7 @@ namespace NotificationBanner {
         };
 
         public static Config Load(string[] args) {
-            var exePath = Utils.GetOwnPath();
+            var exePath = Bluscream.Utils.GetOwnPath();
             var exeName = Path.GetFileNameWithoutExtension(exePath);
             if (string.IsNullOrEmpty(exeName)) exeName = "banner";
             var exeDir = Path.GetDirectoryName(exePath) ?? Environment.CurrentDirectory;
