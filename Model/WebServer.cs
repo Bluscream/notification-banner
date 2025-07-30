@@ -33,37 +33,25 @@ namespace NotificationBanner.Model
                 return;
             }
 
-            // Get all network interface IPs
-            var addresses = GetNetworkInterfaceAddresses();
-            
-            if (!addresses.Any())
+            try
             {
-                Utils.LogError(_config, "No network interfaces found to bind to");
-                return;
+                // Listen on all network interfaces using IPAddress.Any (0.0.0.0)
+                var listener = new TcpListener(IPAddress.Any, apiListenPort);
+                listener.Start();
+                _listeners.Add(listener);
+                
+                Utils.Log(_config, $"[WebServer] Started listening on all interfaces (0.0.0.0):{apiListenPort}");
+                
+                // Start listening for requests
+                _ = Task.Run(() => ListenForRequests(listener), _cancellationTokenSource.Token);
+                
+                _isRunning = true;
+                Utils.Log(_config, "[WebServer] Web server is now running");
             }
-
-            foreach (var ipAddress in addresses)
+            catch (Exception ex)
             {
-                try
-                {
-                    var ip = IPAddress.Parse(ipAddress);
-                    var listener = new TcpListener(ip, apiListenPort);
-                    listener.Start();
-                    _listeners.Add(listener);
-                    
-                    Utils.Log(_config, $"[WebServer] Started listening on {ipAddress}:{apiListenPort}");
-                    
-                    // Start listening for requests
-                    _ = Task.Run(() => ListenForRequests(listener), _cancellationTokenSource.Token);
-                }
-                catch (Exception ex)
-                {
-                    Utils.LogError(_config, $"Failed to start listener on {ipAddress}:{apiListenPort}: {ex.Message}", ex);
-                }
+                Utils.LogError(_config, $"Failed to start web server on port {apiListenPort}: {ex.Message}", ex);
             }
-
-            _isRunning = true;
-            Utils.Log(_config, $"[WebServer] Web server is now running with {_listeners.Count} listeners");
         }
 
         public void Stop()
