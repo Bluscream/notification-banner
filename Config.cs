@@ -21,7 +21,7 @@ namespace NotificationBanner {
     public partial class Config {
         public string? Message { get; set; } = string.Empty;
         public string? Title { get; set; } = "Notification";
-        public string? Time { get; set; } = "10";
+        public string? Time { get; set; } = "5";
         // public string? Image { get; set; } // In DefaultIcon.cs
         public string? Position { get; set; } = "topleft";
         public bool Exit { get; set; } = false;
@@ -43,6 +43,9 @@ namespace NotificationBanner {
         internal FileInfo? GlobalConfigPath { get; set; }
         [JsonIgnore]
         internal FileInfo? ProgramConfigPath { get; set; }
+        
+        [JsonIgnore]
+        internal System.Diagnostics.Stopwatch? TimingStopwatch { get; set; }
 
         public static Config Load(string[] args) {
             var exePath = Bluscream.Utils.GetOwnPath();

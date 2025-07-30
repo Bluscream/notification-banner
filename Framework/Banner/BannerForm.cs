@@ -152,9 +152,16 @@ namespace NotificationBanner.Banner {
                 Location = new Point(x, y);
             }
             _timerHide.Enabled = true;
+            
             if (!Visible) Show();
             TopMost = true;
             PlaySoundAsync(data.Config.Sound);
+            
+            // Stop the stopwatch when notification is visible on screen
+            if (data.Config.TimingStopwatch != null) {
+                data.Config.TimingStopwatch.Stop();
+                Utils.Log(data.Config, $"[BannerForm] Notification visible on screen! Total time: {data.Config.TimingStopwatch.ElapsedMilliseconds}ms");
+            }
         }
 
         /// <summary>
@@ -269,10 +276,10 @@ namespace NotificationBanner.Banner {
         private async void FadeOut() {
             try {
                 while (Opacity > 0.0) {
-                    await Task.Delay(50);
+                    await Task.Delay(25); // Faster fade out animation
                     if (!_hiding)
                         break;
-                    Opacity -= 0.05;
+                    Opacity -= 0.1; // Faster opacity reduction
                 }
                 if (_hiding) {
                     Dispose();

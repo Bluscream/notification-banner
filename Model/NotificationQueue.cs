@@ -19,6 +19,10 @@ namespace NotificationBanner.Model {
                     }
                     return;
                 }
+                
+                // Start timing stopwatch when notification is enqueued
+                config.TimingStopwatch = System.Diagnostics.Stopwatch.StartNew();
+                
                 _queue.Enqueue(config);
                 if (_config != null) {
                     Utils.Log(_config, $"[Queue] Enqueued notification: {config?.Title} - {config?.Message}");

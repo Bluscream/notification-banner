@@ -148,6 +148,7 @@ namespace NotificationBanner.Model
                         await SendHttpResponse(writer, "Missing 'message' parameter", 400);
                         return;
                     }
+                    
                     _notificationQueue.Enqueue(_config);
                     
                     await SendHttpResponse(writer, "Notification queued successfully", 200);
