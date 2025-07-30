@@ -37,7 +37,7 @@ namespace NotificationBanner.Model {
                 }
                 
                 var toastData = CreateBannerData(config);
-                Bluscream.Logging.LogInfo($"Showing notification: {toastData?.Config?.Title} - {toastData?.Config?.Message}", "AppContext");
+                Utils.Log(_currentConfig, $"[AppContext] Showing notification: {toastData?.Config?.Title} - {toastData?.Config?.Message}");
                 if (_bannerForm == null || _bannerForm.IsDisposed) {
                     _bannerForm = new BannerForm();
                     _bannerForm.Disposed += (s, e) => {
@@ -133,7 +133,7 @@ namespace NotificationBanner.Model {
         {
             if (!string.IsNullOrWhiteSpace(config.ApiListenAddresses))
             {
-                _webServer = new WebServer(_notificationQueue);
+                _webServer = new WebServer(_notificationQueue, config);
                 _webServer.Start(config.ApiListenAddresses);
             }
         }

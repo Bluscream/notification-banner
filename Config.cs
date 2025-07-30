@@ -8,6 +8,16 @@ using System.Text.RegularExpressions; // Added for Regex
 using Bluscream;
 
 namespace NotificationBanner {
+    public class DefaultUserConfig : Config {
+        public DefaultUserConfig() {
+            LogFile = Path.Combine(Path.GetTempPath(), "banner.log");
+        }
+    }
+    public class DefaultProgramConfig : Config {
+        public DefaultProgramConfig() {
+            LogFile = Path.Combine(Path.GetTempPath(), "banner.log");
+        }
+    }
     public partial class Config {
         public string? Message { get; set; } = string.Empty;
         public string? Title { get; set; } = "Notification";
@@ -20,7 +30,7 @@ namespace NotificationBanner {
         public string? Size { get; set; } = "100";
         public bool Primary { get; set; } = false;
         public bool Important { get; set; } = false;
-        public string? ApiListenAddresses { get; set; } = "0.0.0.0:14969,[::]:14696";
+        public string? ApiListenAddresses { get; set; } = "*:14969";
         public string? LogFile { get; set; } = Path.Combine(Path.GetTempPath(), "banner.log");
         public bool Console { get; set; } = false;
         public Dictionary<string, string> DefaultImages { get; set; } = new Dictionary<string, string> {
@@ -29,22 +39,21 @@ namespace NotificationBanner {
 
         public static Config Load(string[] args) {
             var exePath = Bluscream.Utils.GetOwnPath();
-            var exeName = Path.GetFileNameWithoutExtension(exePath);
-            if (string.IsNullOrEmpty(exeName)) exeName = "banner";
-            var exeDir = Path.GetDirectoryName(exePath) ?? Environment.CurrentDirectory;
-            var userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var programConfigPath = Path.Combine(exeDir, exeName + ".json");
-            var userConfigPath = Path.Combine(userDir, exeName + ".json");
+            var programConfigPath = exePath.ReplaceExtension("json");
+            var userConfigPath = Environment.SpecialFolder.UserProfile.Combine(exePath.FileNameWithoutExtension + ".json");
 
             var config = new Config();
-            if (!File.Exists(programConfigPath))
-                config.SaveToFile(programConfigPath);
-            else
-                config.LoadFromFile(programConfigPath);
-            if (!File.Exists(userConfigPath))
-                config.SaveToFile(userConfigPath);
-            else
-                config.LoadFromFile(userConfigPath);
+            if (!programConfigPath.Exists) {
+                // config.SaveToFile(programConfigPath.FullName);
+            } else {
+                config.LoadFromFile(programConfigPath.FullName);
+            }
+
+            if (!userConfigPath.Exists) {
+                // config.SaveToFile(userConfigPath.FullName);
+            } else {
+                config.LoadFromFile(userConfigPath.FullName);
+            }
 
             bool imageSetByCmd = false;
             if (args.Length == 1 && !(args[0].StartsWith("-") || args[0].StartsWith("/"))) {
@@ -91,6 +100,7 @@ namespace NotificationBanner {
                     var value = prop.GetValue(loaded);
                     if (value != null) prop.SetValue(this, value);
                 }
+                Utils.Log(this, $"Loaded config from: {path}");
             } catch { /* ignore errors, fallback to defaults */ }
         }
 
@@ -102,6 +112,7 @@ namespace NotificationBanner {
                 };
                 var json = JsonSerializer.Serialize(this, options);
                 File.WriteAllText(path, json);
+                Utils.Log(this, $"Saved config to: {path}");
             } catch { /* ignore errors */ }
         }
 

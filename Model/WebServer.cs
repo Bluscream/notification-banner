@@ -13,13 +13,15 @@ namespace NotificationBanner.Model
     internal class WebServer
     {
         private readonly NotificationQueue _notificationQueue;
+        private readonly Config _config;
         private readonly List<HttpListener> _listeners = new();
         private readonly CancellationTokenSource _cancellationTokenSource = new();
         private bool _isRunning = false;
 
-        public WebServer(NotificationQueue notificationQueue)
+        public WebServer(NotificationQueue notificationQueue, Config config)
         {
             _notificationQueue = notificationQueue;
+            _config = config;
         }
 
         public void Start(string apiListenAddresses)
@@ -39,19 +41,39 @@ namespace NotificationBanner.Model
             {
                 try
                 {
+                    // Handle IPv6 addresses properly
+                    string formattedAddress = address;
+                    if (address.StartsWith("[") && address.Contains("]:"))
+                    {
+                        // IPv6 address like [::]:port
+                        var parts = address.Split("]:", 2);
+                        if (parts.Length == 2)
+                        {
+                            var ipv6Part = parts[0].TrimStart('[');
+                            var portPart = parts[1];
+                            formattedAddress = $"[{ipv6Part}]:{portPart}";
+                        }
+                    }
+                    
                     var listener = new HttpListener();
-                    listener.Prefixes.Add($"http://{address}/");
+                    var url = $"http://{formattedAddress}/";
+                    listener.Prefixes.Add(url);
                     listener.Start();
                     _listeners.Add(listener);
                     
-                    Bluscream.Logging.LogInfo($"Started listening on http://{address}/", "WebServer");
+                    Utils.Log(_config, $"[WebServer] Started listening on {url}");
                     
                     // Start listening for requests
                     _ = Task.Run(() => ListenForRequests(listener), _cancellationTokenSource.Token);
                 }
                 catch (Exception ex)
                 {
-                    Bluscream.Logging.LogError($"Failed to start listener on {address}", ex);
+                    var errorMessage = ex.Message;
+                    if (errorMessage.Contains("The request is not supported"))
+                    {
+                        errorMessage = "Invalid URL format or unsupported address. Try using 127.0.0.1:port or localhost:port";
+                    }
+                    Utils.LogError(_config, $"Failed to start listener on {address}: {errorMessage}", ex);
                 }
             }
 
@@ -74,13 +96,13 @@ namespace NotificationBanner.Model
                 }
                 catch (Exception ex)
                 {
-                    Bluscream.Logging.LogError("Error stopping listener", ex);
+                    Utils.LogError(_config, "Error stopping listener", ex);
                 }
             }
             
             _listeners.Clear();
             _isRunning = false;
-            Bluscream.Logging.LogInfo("Stopped", "WebServer");
+            Utils.Log(_config, "[WebServer] Stopped");
         }
 
         private async Task ListenForRequests(HttpListener listener)
@@ -99,7 +121,7 @@ namespace NotificationBanner.Model
                 }
                 catch (Exception ex)
                 {
-                    Bluscream.Logging.LogError("Error accepting request", ex);
+                    Utils.LogError(_config, "Error accepting request", ex);
                 }
             }
         }
@@ -111,7 +133,7 @@ namespace NotificationBanner.Model
             
             try
             {
-                Bluscream.Logging.LogInfo($"{request.HttpMethod} {request.Url}", "WebServer");
+                Utils.Log(_config, $"[WebServer] {request.HttpMethod} {request.Url}");
                 
                 // Handle all HTTP methods
                 if (request.HttpMethod == "GET" || request.HttpMethod == "POST" || 
@@ -138,7 +160,7 @@ namespace NotificationBanner.Model
             }
             catch (Exception ex)
             {
-                Bluscream.Logging.LogError("Error handling request", ex);
+                Utils.LogError(_config, "Error handling request", ex);
                 await SendResponse(response, "Internal server error", HttpStatusCode.InternalServerError);
             }
             finally

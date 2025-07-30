@@ -36,23 +36,20 @@ namespace NotificationBanner {
             _singleInstanceMutex = new Mutex(true, MutexName, out isFirstInstance);
             var config = Config.Load(args);
             
-            // Initialize logging system
-            Bluscream.Logging.Initialize(config.LogFile, config.Console);
-            
             if (!isFirstInstance)
             {
                 NotificationPipeServer.SendNotification(config);
                 return 0;
             }
-            if (!config.Console)
-            {
+            if (!config.Console) {
                 Bluscream.Utils.HideConsoleWindow();
+            } else {
+                Bluscream.Utils.CreateConsole();
+                Bluscream.Utils.SetConsoleTitle("Notification Banner");
+                Utils.Log(config, $"{System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName} {string.Join(" ", args)}");
             }
             var notificationQueue = new NotificationQueue();
-            
-            // Only enqueue notification if message is provided
-            if (!string.IsNullOrWhiteSpace(config.Message))
-            {
+            if (!string.IsNullOrWhiteSpace(config.Message)) {
                 notificationQueue.Enqueue(config);
             }
 
