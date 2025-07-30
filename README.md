@@ -112,15 +112,6 @@ banner.exe --message "Critical security alert!" --title "Security Alert" --impor
 
 **Position Values:** `topleft`, `topright`, `bottomleft`, `bottomright`, `topcenter`, `bottomcenter`, `center`
 
-## Configuration Files
-
-The application supports configuration files for setting defaults:
-
-- **Program-level**: `%PROGRAMDATA%\banner.json`
-- **User-level**: `%USERPROFILE%\banner.json`
-
-User-level configuration overrides program-level settings. Everything else overrides both.
-
 ## Advanced Features
 
 ### Do Not Disturb Mode
@@ -143,10 +134,32 @@ The application supports automatic image selection based on the notification tit
 4. The first matching pattern takes precedence
 
 #### Configuration
-DefaultImages can be configured in the JSON configuration files (both program-level and user-level). The configuration uses regex patterns as keys and image URLs/paths as values:
+The application supports JSON configuration files for persistent settings. Configuration files can be placed at:
+
+- **Global**: `%ProgramData%\notification-banner.json` (requires admin privileges)
+- **Program**: `notification-banner.json` (in the same directory as the executable)
+- **User**: `%USERPROFILE%\notification-banner.json`
+
+User-level configuration overrides program-level settings. Everything else overrides both.
+
+The configuration uses JSON format with the following structure:
 
 ```json
 {
+  "Message": "",
+  "Title": "Notification",
+  "Time": "10",
+  "Position": "topleft",
+  "Exit": false,
+  "Color": "",
+  "Sound": "C:\\Windows\\Media\\Windows Notify System Generic.wav",
+  "Size": "100",
+  "Primary": false,
+  "Important": false,
+  "ApiListenPort": 14969,
+  "LogFile": "C:\\Users\\username\\AppData\\Local\\Temp\\banner.log",
+  "Console": false,
+  "CreateDefaultConfig": false,
   "DefaultImages": {
     "HASS\\.Agent": "https://www.hass-agent.io/2.1/assets/images/logo/logo-256.png",
     "error|fail|critical": "C:/Images/error.png",
@@ -154,6 +167,19 @@ DefaultImages can be configured in the JSON configuration files (both program-le
     "info|notice": "C:/Images/info.png"
   }
 }
+```
+
+**Configuration Priority:**
+1. Command line arguments (highest priority)
+2. Global configuration file
+3. Program configuration file  
+4. User configuration file
+5. Default values (lowest priority)
+
+**Creating Default Configuration Files:**
+```bash
+# Create default config files in all locations
+banner.exe --create-default-config
 ```
 
 #### Default Images Example
